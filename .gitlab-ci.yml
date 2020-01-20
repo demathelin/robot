@@ -59,7 +59,7 @@ analysis:coverage:
     - mkdir -p analysis/gcov
     - source ci_ws/devel/setup.bash
     - ls
-    - timeout 15s roslaunch velocity_qp run.launch sim:=true|| echo exit code $?
+    - timeout 30s roslaunch velocity_qp run.launch sim:=true|| echo exit code $?
     - gcovr --filter="/home/*" --root="$PWD" --xml-pretty --object-directory="$PWD/ci_ws/build" --output="analysis/coverage.xml"
   dependencies:
     - build:debug:u180464b
