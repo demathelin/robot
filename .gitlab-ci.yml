@@ -94,7 +94,6 @@ sonarqube:
     - ci-auctus
     - u180464b
   script:
-    - ls catkin_ws
     - export PATH=$PATH:/home/ci/sonar-scanner-3.3.0.1492-linux/bin
     - sonar-scanner
     
