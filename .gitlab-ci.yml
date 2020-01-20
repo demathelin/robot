@@ -38,6 +38,7 @@ build:debug:u180464b:
     - mv !(ci_ws) ci_ws/src/velocity_qp
     - cd ci_ws/src/
     - git clone https://github.com/kuka-isir/qpOASES.git
+    - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@ggitlab.inria.fr/auctus/panda/franka_description.git
     - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@gitlab.inria.fr/auctus/panda/panda_traj.git
     - cd ..
     - catkin config --init --extend=/home/ci/soft/franka_ros_ws/devel --cmake-args -DFranka_DIR:PATH=/home/ci/soft/libfranka/build
@@ -57,8 +58,8 @@ analysis:coverage:
     - u180464b
   script:
     - mkdir -p analysis/gcov
-    - source ci_ws/devel/setup.bash
-    - ls
+    - source ci_ws/devel/setup.bash=
+    - export GAZEBO_RESOURCE_PATH=ci_ws/src/franka_description/worlds/
     - timeout 30s roslaunch velocity_qp run.launch sim:=true|| echo exit code $?
     - gcovr --filter="/home/*" --root="$PWD" --xml-pretty --object-directory="$PWD/ci_ws/build" --output="analysis/coverage.xml"
   dependencies:
