@@ -1,0 +1,115 @@
+stages:
+  - prepare
+  - build
+  - test
+  - centralize
+  - deploy
+
+# prepare
+prepare:initialization:
+  stage: prepare
+  tags:
+    - ci-auctus
+    - u180464b
+  script:
+    - echo ci | sudo -S mv /usr/local/lib/libexpat.so.1 /usr/local/lib/libexpat.so.1.bak && echo $?;echo $?;
+  allow_failure: true
+  
+  
+# builds  
+#build:release:u180464b:
+#  stage: build
+#  tags:
+#    - ci-auctus
+#    - u180464b
+#  script:
+#    - cd catkin_ws/
+#    - source /opt/ros/kinetic/setup.bash
+#    - catkin_make -j2 --force-cmake -DCMAKE_BUILD_TYPE=Release
+    
+build:debug:u180464b:
+  stage: build
+  tags:
+    - ci-auctus
+    - u180464b
+  script:
+    - mkdir -p ci_ws/src/velocity_qp
+    - shopt -s extglob
+    - mv !(ci_ws) ci_ws/src/velocity_qp
+    - cd ci_ws/src/
+    - git clone https://gitlab.inria.fr/auctus/panda/panda_traj.git
+    - catkin config --init --extend=/home/ci/soft/franka_ros_ws/devel --cmake-args -DFranka_DIR:PATH=/home/ci/soft/libfranka/build
+    - source /home/ci/soft/franka_ros_ws/devel/setup.bash
+    - catkin build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=--coverage
+  artifacts:
+    paths:
+      - ci_ws/src
+      - ci_ws/build
+      - ci_ws/devel  
+    
+# analysis
+analysis:coverage:
+  stage: test
+  tags:
+    - ci-auctus
+    - u180464b
+  script:
+    - mkdir -p analysis/gcov
+    - source ci_ws/devel/setup.bash
+    - ls
+    - timeout 5s roslaunch velocity_qp run.launch robot_ip:=192.16.0.2 || echo exit code $?
+    - gcovr --filter="/home/*" --root="$PWD" --xml-pretty --object-directory="$PWD/ci_ws/build" --output="analysis/coverage.xml"
+  dependencies:
+    - build:debug:u180464b
+  artifacts:
+    paths:
+      - analysis
+      - ci_ws/devel
+      - ci_ws/src      
+  allow_failure: true
+  
+analysis:static:
+  stage: test
+  tags:
+    - ci-auctus
+    - u180464b
+  script:
+    - mkdir analysis
+    - cppcheck --enable=all --suppress=missingIncludeSystem --xml ci_ws/src/velocity_qp &> analysis/cppcheckOutput.xml
+    - rats --xml --warning=3 ci_ws/src > analysis/ratsOutput.xml
+  dependencies:
+    - build:debug:u180464b
+  artifacts:
+    paths:
+      - analysis
+
+sonarqube:
+  stage: centralize
+  dependencies:
+    - analysis:coverage
+    - analysis:static
+  tags:
+    - ci-auctus
+    - u180464b
+  script:
+    - ls catkin_ws
+    - export PATH=$PATH:/home/ci/sonar-scanner-3.3.0.1492-linux/bin
+    - sonar-scanner
+    
+# documentation deployment
+pages:
+  stage: deploy
+  tags:
+    - ci-auctus
+    - u180464b
+  script:
+    - doxygen Doxyfile
+    - mv html/ public/
+  artifacts:
+    paths:
+      - public
+  dependencies:
+    - sonarqube
+  only:
+    - master
+

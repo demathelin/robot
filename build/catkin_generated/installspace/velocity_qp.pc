@@ -1,8 +1,0 @@
-prefix=/usr/local
-
-Name: velocity_qp
-Description: Description of velocity_qp
-Version: 0.0.1
-Cflags: -I/usr/local/include -I/opt/ros/melodic/include/libfranka
-Libs: -L/usr/local/lib -lvelocity_qp /opt/ros/melodic/lib/libfranka.so.0.7.1
-Requires: controller_interface franka_hw franka_control franka_gripper hardware_interface message_runtime pluginlib roscpp roscpp gazebo_ros
