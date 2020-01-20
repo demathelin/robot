@@ -1,0 +1,7 @@
+<library path="lib/libvelocity_qp">
+  <class name="velocity_qp/PandaController" type="velocity_qp::PandaController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A joint velocity controller
+    </description>
+  </class>
+</library>

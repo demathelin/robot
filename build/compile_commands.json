@@ -1,0 +1,52 @@
+[
+{
+  "directory": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build",
+  "command": "/usr/bin/clang++-6.0  -DLIBBULLET_VERSION=2.87 -DLIBBULLET_VERSION_GT_282 -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"velocity_qp\\\" -Dvelocity_qp_EXPORTS -I/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build/devel/include -isystem /home/lucas/panda_ws/src/auctuspanda/velocity_qp/include -isystem /home/lucas/panda_ws/devel/.private/franka_control/include -isystem /home/lucas/panda_ws/devel/.private/franka_gripper/include -isystem /home/lucas/panda_ws/src/auctuspanda/franka_control/include -isystem /home/lucas/panda_ws/src/auctuspanda/franka_gripper/include -isystem /home/lucas/soft/franka_ros_ws/devel/.private/franka_msgs/include -isystem /home/lucas/soft/franka_ros_ws/src/franka_hw/include -isystem /home/lucas/soft/lwr_ws/install/include -isystem /opt/ros/melodic/include -isystem /opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /opt/ros/melodic/share/orocos_kdl/cmake/../../../include -isystem /home/lucas/soft/libfranka/include -isystem /usr/include/eigen3 -isystem /usr/local/include/eigen3 -isystem /usr/include/gazebo-9 -isystem /usr/include/bullet -isystem /usr/include/simbody -isystem /usr/include/sdformat-6.0 -isystem /usr/include/ignition/math4 -isystem /usr/include/OGRE -isystem /usr/include/OGRE/Terrain -isystem /usr/include/OGRE/Paging -isystem /usr/include/ignition/transport4 -isystem /usr/include/ignition/msgs1 -isystem /usr/include/ignition/common1 -isystem /usr/include/ignition/fuel_tools1 -isystem /opt/ros/melodic/include/libfranka -I/home/lucas/panda_ws/src/auctuspanda/velocity_qp/src -isystem /usr/include/uuid -isystem /usr/include/x86_64-linux-gnu  -O3 -DNDEBUG -fPIC   -I/usr/include/uuid -I/usr/include/x86_64-linux-gnu -std=gnu++14 -o CMakeFiles/velocity_qp.dir/src/controller/controller.cpp.o -c /home/lucas/panda_ws/src/auctuspanda/velocity_qp/src/controller/controller.cpp",
+  "file": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/src/controller/controller.cpp"
+},
+{
+  "directory": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build",
+  "command": "/usr/bin/clang++-6.0  -DLIBBULLET_VERSION=2.87 -DLIBBULLET_VERSION_GT_282 -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"velocity_qp\\\" -Dvelocity_qp_EXPORTS -I/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build/devel/include -isystem /home/lucas/panda_ws/src/auctuspanda/velocity_qp/include -isystem /home/lucas/panda_ws/devel/.private/franka_control/include -isystem /home/lucas/panda_ws/devel/.private/franka_gripper/include -isystem /home/lucas/panda_ws/src/auctuspanda/franka_control/include -isystem /home/lucas/panda_ws/src/auctuspanda/franka_gripper/include -isystem /home/lucas/soft/franka_ros_ws/devel/.private/franka_msgs/include -isystem /home/lucas/soft/franka_ros_ws/src/franka_hw/include -isystem /home/lucas/soft/lwr_ws/install/include -isystem /opt/ros/melodic/include -isystem /opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /opt/ros/melodic/share/orocos_kdl/cmake/../../../include -isystem /home/lucas/soft/libfranka/include -isystem /usr/include/eigen3 -isystem /usr/local/include/eigen3 -isystem /usr/include/gazebo-9 -isystem /usr/include/bullet -isystem /usr/include/simbody -isystem /usr/include/sdformat-6.0 -isystem /usr/include/ignition/math4 -isystem /usr/include/OGRE -isystem /usr/include/OGRE/Terrain -isystem /usr/include/OGRE/Paging -isystem /usr/include/ignition/transport4 -isystem /usr/include/ignition/msgs1 -isystem /usr/include/ignition/common1 -isystem /usr/include/ignition/fuel_tools1 -isystem /opt/ros/melodic/include/libfranka -I/home/lucas/panda_ws/src/auctuspanda/velocity_qp/src -isystem /usr/include/uuid -isystem /usr/include/x86_64-linux-gnu  -O3 -DNDEBUG -fPIC   -I/usr/include/uuid -I/usr/include/x86_64-linux-gnu -std=gnu++14 -o CMakeFiles/velocity_qp.dir/src/robot/panda_control.cpp.o -c /home/lucas/panda_ws/src/auctuspanda/velocity_qp/src/robot/panda_control.cpp",
+  "file": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/src/robot/panda_control.cpp"
+},
+{
+  "directory": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build",
+  "command": "/usr/bin/clang++-6.0  -DLIBBULLET_VERSION=2.87 -DLIBBULLET_VERSION_GT_282 -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"velocity_qp\\\" -Dvelocity_qp_EXPORTS -I/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build/devel/include -isystem /home/lucas/panda_ws/src/auctuspanda/velocity_qp/include -isystem /home/lucas/panda_ws/devel/.private/franka_control/include -isystem /home/lucas/panda_ws/devel/.private/franka_gripper/include -isystem /home/lucas/panda_ws/src/auctuspanda/franka_control/include -isystem /home/lucas/panda_ws/src/auctuspanda/franka_gripper/include -isystem /home/lucas/soft/franka_ros_ws/devel/.private/franka_msgs/include -isystem /home/lucas/soft/franka_ros_ws/src/franka_hw/include -isystem /home/lucas/soft/lwr_ws/install/include -isystem /opt/ros/melodic/include -isystem /opt/ros/melodic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -isystem /opt/ros/melodic/share/orocos_kdl/cmake/../../../include -isystem /home/lucas/soft/libfranka/include -isystem /usr/include/eigen3 -isystem /usr/local/include/eigen3 -isystem /usr/include/gazebo-9 -isystem /usr/include/bullet -isystem /usr/include/simbody -isystem /usr/include/sdformat-6.0 -isystem /usr/include/ignition/math4 -isystem /usr/include/OGRE -isystem /usr/include/OGRE/Terrain -isystem /usr/include/OGRE/Paging -isystem /usr/include/ignition/transport4 -isystem /usr/include/ignition/msgs1 -isystem /usr/include/ignition/common1 -isystem /usr/include/ignition/fuel_tools1 -isystem /opt/ros/melodic/include/libfranka -I/home/lucas/panda_ws/src/auctuspanda/velocity_qp/src -isystem /usr/include/uuid -isystem /usr/include/x86_64-linux-gnu  -O3 -DNDEBUG -fPIC   -I/usr/include/uuid -I/usr/include/x86_64-linux-gnu -std=gnu++14 -o CMakeFiles/velocity_qp.dir/src/robot/panda_simulation.cpp.o -c /home/lucas/panda_ws/src/auctuspanda/velocity_qp/src/robot/panda_simulation.cpp",
+  "file": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/src/robot/panda_simulation.cpp"
+},
+{
+  "directory": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build/gtest/googlemock",
+  "command": "/usr/bin/clang++-6.0  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_main_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -O3 -DNDEBUG -fPIC     -DGTEST_HAS_PTHREAD=1   -std=gnu++14 -o CMakeFiles/gmock_main.dir/__/googletest/src/gtest-all.cc.o -c /usr/src/googletest/googletest/src/gtest-all.cc",
+  "file": "/usr/src/googletest/googletest/src/gtest-all.cc"
+},
+{
+  "directory": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build/gtest/googlemock",
+  "command": "/usr/bin/clang++-6.0  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_main_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -O3 -DNDEBUG -fPIC     -DGTEST_HAS_PTHREAD=1   -std=gnu++14 -o CMakeFiles/gmock_main.dir/src/gmock-all.cc.o -c /usr/src/googletest/googlemock/src/gmock-all.cc",
+  "file": "/usr/src/googletest/googlemock/src/gmock-all.cc"
+},
+{
+  "directory": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build/gtest/googlemock",
+  "command": "/usr/bin/clang++-6.0  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_main_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -O3 -DNDEBUG -fPIC     -DGTEST_HAS_PTHREAD=1   -std=gnu++14 -o CMakeFiles/gmock_main.dir/src/gmock_main.cc.o -c /usr/src/googletest/googlemock/src/gmock_main.cc",
+  "file": "/usr/src/googletest/googlemock/src/gmock_main.cc"
+},
+{
+  "directory": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build/gtest/googlemock",
+  "command": "/usr/bin/clang++-6.0  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -O3 -DNDEBUG -fPIC     -DGTEST_HAS_PTHREAD=1   -std=gnu++14 -o CMakeFiles/gmock.dir/__/googletest/src/gtest-all.cc.o -c /usr/src/googletest/googletest/src/gtest-all.cc",
+  "file": "/usr/src/googletest/googletest/src/gtest-all.cc"
+},
+{
+  "directory": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build/gtest/googlemock",
+  "command": "/usr/bin/clang++-6.0  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgmock_EXPORTS -I/usr/src/googletest/googlemock/include -I/usr/src/googletest/googlemock -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -O3 -DNDEBUG -fPIC     -DGTEST_HAS_PTHREAD=1   -std=gnu++14 -o CMakeFiles/gmock.dir/src/gmock-all.cc.o -c /usr/src/googletest/googlemock/src/gmock-all.cc",
+  "file": "/usr/src/googletest/googlemock/src/gmock-all.cc"
+},
+{
+  "directory": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build/gtest/googlemock/gtest",
+  "command": "/usr/bin/clang++-6.0  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgtest_main_EXPORTS -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -O3 -DNDEBUG -fPIC     -DGTEST_HAS_PTHREAD=1   -std=gnu++14 -o CMakeFiles/gtest_main.dir/src/gtest_main.cc.o -c /usr/src/googletest/googletest/src/gtest_main.cc",
+  "file": "/usr/src/googletest/googletest/src/gtest_main.cc"
+},
+{
+  "directory": "/home/lucas/panda_ws/src/auctuspanda/velocity_qp/build/gtest/googlemock/gtest",
+  "command": "/usr/bin/clang++-6.0  -DGTEST_CREATE_SHARED_LIBRARY=1 -Dgtest_EXPORTS -I/usr/src/googletest/googletest/include -I/usr/src/googletest/googletest  -O3 -DNDEBUG -fPIC     -DGTEST_HAS_PTHREAD=1   -std=gnu++14 -o CMakeFiles/gtest.dir/src/gtest-all.cc.o -c /usr/src/googletest/googletest/src/gtest-all.cc",
+  "file": "/usr/src/googletest/googletest/src/gtest-all.cc"
+}
+]

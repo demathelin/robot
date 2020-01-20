@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+killall --quiet -9  gazebo & killall --quiet -9 gzserver  & killall --quiet -9 gzclient
