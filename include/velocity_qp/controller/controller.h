@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * \file controller.h
+ * \brief Main header
+ * \author Lucas Joseph
+ * \version 0.1
+ * \date 21/01/2020
+ *
+ * Header for the control of the velocity qp
+ *
+ */
+
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 
@@ -120,7 +131,9 @@ private:
     }
 }
     /**
-    * @brief Initializes publishers
+    * \fn void init_publishers
+    * \brief Initializes publishers
+    * \param ros::NodeHandle& node_handle a ros node handle
     */
     void init_publishers(ros::NodeHandle& node_handle);
     
