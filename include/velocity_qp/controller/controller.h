@@ -86,6 +86,9 @@
 #include <eigen_conversions/eigen_msg.h>
 
 namespace Controller {
+    /**
+     * \class The controller class
+    */
 class Controller{
 public:
         /**
