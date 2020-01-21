@@ -10,7 +10,7 @@
 [![Comment ratio](https://sonarqube.inria.fr/sonarqube/api/badges/measure?key=auctus:panda:velocity-qp&metric=comment_lines_density)](https://sonarqube.inria.fr/sonarqube/dashboard/index/auctus:panda:velocity-qp)
 
 # Links
-- Sonarqube : https://sonarqube.inria.fr/sonarqube/dashboard?id=auctus%3Apanda%velocity-qp
+- Sonarqube : https://sonarqube.inria.fr/sonarqube/dashboard?id=auctus%3Apanda%3Avelocity-qp
 - Documentation : https://auctus.gitlabpages.inria.fr/panda/velocity_qp/index.html
 
 
