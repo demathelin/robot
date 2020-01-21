@@ -153,7 +153,7 @@ private:
     /**
     * \fn  void paramCallback
     * \brief Callback routine for the dynamic reconfigure GUI
-    * \param velocity_qp::paramConfig& config the new robbbbbot config
+    * \param velocity_qp::paramConfig& config the new robot config
     * \param uint32_t level not used
     */
     void paramCallback(velocity_qp::paramConfig& config, uint32_t level);
@@ -233,16 +233,16 @@ private:
     std::string root_link_,tip_link_;
     
     
-    Eigen::Matrix<double,6,1> x_err;
-    Eigen::Matrix <double,6,7> J;
-    Eigen::Matrix <double,7,7> M;
+    Eigen::Matrix<double,6,1> x_err; /*!< Enum value TVal1. */  
+    Eigen::Matrix <double,6,7> J; /*!< Jacobian in Eigen */  
+    Eigen::Matrix <double,7,7> M; /*!< Inertia matrix in joint space in Eigen */  
 
     // Kinetic energy variables
-    Eigen::Matrix<double,6,6> Lambda_;
-    double m_u;
-    Eigen::Matrix<double,3,1> u;
-    KDL::Vector dir_;
-    double ec_lim;
+    Eigen::Matrix<double,6,6> Lambda_; /*!< Inertia Matrix in operation space in Eigen */  
+    double m_u; /*!< Projected mass in the direction of motion u */  
+    Eigen::Matrix<double,3,1> u; /*!< Direction of motion in Eigen*/  
+    KDL::Vector dir_; /*!< Direction of motion in KDL*/
+    double ec_lim; /*!< Maximum allowed kinetic energy*/
 
     // Matrices for qpOASES
     // NOTE: We need RowMajor (see qpoases doc)
