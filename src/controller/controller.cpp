@@ -4,7 +4,7 @@ using namespace KDL;
 using namespace std;
 
 namespace Controller{
-bool Controller::init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eigen::VectorXd qd_init) 
+bool Controller::Init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eigen::VectorXd qd_init) 
 {
     ROS_WARN("Using velocity_qp controller !!! ");
 

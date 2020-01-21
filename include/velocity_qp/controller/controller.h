@@ -89,14 +89,14 @@ namespace Controller {
 class Controller{
 public:
         /**
-        * \fn bool init
+        * \fn bool Init
         * \brief Initializes the controller
         * \param ros::NodeHandle& node_handle a ros node handle
         * \param Eigen::VectorXd q_init the robot initial joint position
         * \param Eigen::VectorXd qd_init the robot initial joint velocity
         * \return true if the controller is correctly initialized
         */
-        bool init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eigen::VectorXd qd_init);
+        bool Init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eigen::VectorXd qd_init);
     
         /**
         * \fn std::tuple<Eigen::VectorXd, Eigen::VectorXd> update
