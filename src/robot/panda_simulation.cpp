@@ -45,7 +45,6 @@ namespace gazebo
             // Provide feedback to get the internal torque
             joint->SetProvideFeedback(true);
             // Not adding fixed joints
-            bool added = false;
             if( true
                 && joint->LowerLimit(0u) != joint->UpperLimit(0u)
                 && joint->LowerLimit(0u) != 0
@@ -55,7 +54,6 @@ namespace gazebo
             {
                 joints_.push_back(joint);
                 actuated_joint_names_.push_back(joint->GetName());
-                added = true;
             }
         }
 
@@ -145,7 +143,7 @@ namespace gazebo
         node_handle.getParam("/velocity_qp/tip_link_",tip_link_);
         KDL::Chain chain;
         ik_solver.reset(new TRAC_IK::TRAC_IK(root_link_, tip_link_, urdf_param, timeout, eps));
-        bool valid = ik_solver->getKDLChain(chain);
+        ik_solver->getKDLChain(chain);
 
         for(unsigned int i=0; i<chain.getNrOfSegments(); ++i)
             ROS_INFO_STREAM("    "<<chain.getSegment(i).getName());
@@ -476,7 +474,8 @@ namespace gazebo
         
             current_joint_positions_[i] = joint->Position(0);
             current_joint_velocities_[i] = joint->GetVelocity(0);
-            current_joint_external_torques_[i] = joint->GetForce(0); // WARNING: This is the  external estimated force (= force applied to the joint = torque command from user)
+            current_joint_external_torques_[i] = joint->GetForce(0); // WARNING: This is the  external estimated force 
+                                                                     // (= force applied to the joint = torque command from user)
 
             auto w = joint->GetForceTorque(0u);
             auto a = joint->LocalAxis(0u);
@@ -497,13 +496,14 @@ namespace gazebo
     * \param const std::vector<std::string>& joint_names vector containing the names of the joint to configure
     * \param const std::vector<double>& joint_positions vector containing the position of the joint to configure
     */
-   
+
     void setModelConfiguration(const std::vector<std::string>& joint_names,const std::vector<double>& joint_positions)
     {
     assertModelLoaded();
     if (joint_names.size() != joint_positions.size())
     {
-        std::cerr << "[GazeboModel \'" << getName() << "\'] " << "joint_names lenght should be the same as joint_positions : " << joint_names.size() << " vs " << joint_positions.size() << '\n';
+        std::cerr << "[GazeboModel \'" << getName() << "\'] " << "joint_names lenght should be the same as joint_positions : " 
+        << joint_names.size() << " vs " << joint_positions.size() << '\n';
         return;
     }
 
