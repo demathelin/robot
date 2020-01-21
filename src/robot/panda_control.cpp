@@ -109,7 +109,7 @@ bool PandaController::init(hardware_interface::RobotHW* robot_hardware, ros::Nod
         qd_init(i) = robot_state.dq[i];
     }
     
-    qp.init(node_handle, q_init, qd_init);
+    qp.Init(node_handle, q_init, qd_init);
   
     
     return true;

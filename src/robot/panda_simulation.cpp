@@ -123,7 +123,7 @@ namespace gazebo
         joint_states_.velocity.resize(ndof_);
         joint_states_.effort.resize(ndof_);
 
-        qp.init(node_handle,current_joint_positions_,current_joint_velocities_);
+        qp.Init(node_handle,current_joint_positions_,current_joint_velocities_);
 
          
     // get robot descritpion
