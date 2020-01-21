@@ -88,7 +88,24 @@
 namespace Controller {
 class Controller{
 public:
+        /**
+        * \fn bool init
+        * \brief Initializes the controller
+        * \param ros::NodeHandle& node_handle a ros node handle
+        * \param Eigen::VectorXd q_init the robot initial joint position
+        * \param Eigen::VectorXd qd_init the robot initial joint velocity
+        * \return true if the controller is correctly initialized
+        */
         bool init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eigen::VectorXd qd_init);
+    
+        /**
+        * \fn std::tuple<Eigen::VectorXd, Eigen::VectorXd> update
+        * \brief Update the controller to get the new desired joint velocity to send to the robot.
+        * \param Eigen::VectorXd q the current joint position of the robot
+        * \param Eigen::VectorXd qd the current joint velocity of the robot
+        * \param const ros::Duration& period the refresh rate of the control
+        * \return A std::tupe with the desired joint velocity and information on the qp solver
+        */
         std::tuple<Eigen::VectorXd, Eigen::VectorXd> update(Eigen::VectorXd q, Eigen::VectorXd qd, const ros::Duration& period);
 
 private:
