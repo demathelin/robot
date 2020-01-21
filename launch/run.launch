@@ -21,7 +21,7 @@
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
             <!--<arg name="world_name" value="$(find gazebo_tutorials)/worlds/model_push.world"/>-->
             <arg name="paused" value="false"/>
-            <arg name="verbose" value="false"/>
+            <arg name="verbose" value="true"/>
             <arg name="world_name" value="panda_world.world"/>
             <arg name="gui" value="false"/>
             <!-- more default parameters can be changed here -->
