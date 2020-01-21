@@ -217,87 +217,87 @@ private:
 
     
     
-    KDL::Chain chain; /*!< KDL chain corresponding to the robot */  
-    KDL::JntArray ll; /*!< Joint lower limits vector*/  
-    KDL::JntArray ul; /*!< Joint upper limits vector*/   
-    KDL::JntArray gravity_kdl; /*!< KDL gravity vector  */
+    KDL::Chain chain; /*!< @brief KDL chain corresponding to the robot */  
+    KDL::JntArray ll; /*!< @brief Joint lower limits vector*/  
+    KDL::JntArray ul; /*!< @brief Joint upper limits vector*/   
+    KDL::JntArray gravity_kdl; /*!< @brief KDL gravity vector  */
 
-    KDL::Jacobian J_; /*!< KDL gravity vector  */
+    KDL::Jacobian J_; /*!< @brief KDL gravity vector  */
 
-    KDL::JntSpaceInertiaMatrix M_;  /*!< KDL inertia matrix in joint space */
+    KDL::JntSpaceInertiaMatrix M_;  /*!< @brief KDL inertia matrix in joint space */
 
-    KDL::Frame X_curr_; /*!< KDL current Cartesian pose of the tip_link */
-    KDL::Frame X_traj_; /*!< KDL desired Cartesian pose of the tip_link */
-    KDL::Frame X_traj_next; /*!< Previous KDL desired Cartesian pose of the tip_link */
+    KDL::Frame X_curr_; /*!< @brief KDL current Cartesian pose of the tip_link */
+    KDL::Frame X_traj_; /*!< @brief KDL desired Cartesian pose of the tip_link */
+    KDL::Frame X_traj_next; /*!< @brief Previous KDL desired Cartesian pose of the tip_link */
     
-    KDL::FrameVel Xd_curr_; /*!< KDL current Cartesian twist of the tip_link */
+    KDL::FrameVel Xd_curr_; /*!< @brief KDL current Cartesian twist of the tip_link */
 
-    KDL::Twist Xd_traj_;  /*!< KDL desired Cartesian twist of the tip_link */
-    KDL::Twist Xdd_traj_; /*!< KDL desired Cartesian acceleration of the tip_link */
-    KDL::Twist X_err_; /*!< KDL desired Cartesian error between the desired and current pose */
+    KDL::Twist Xd_traj_;  /*!< @brief KDL desired Cartesian twist of the tip_link */
+    KDL::Twist Xdd_traj_; /*!< @brief KDL desired Cartesian acceleration of the tip_link */
+    KDL::Twist X_err_; /*!< @brief KDL desired Cartesian error between the desired and current pose */
 
-    KDL::JntArrayVel q_in; /*!< KDL joint position of the robot */
-    Eigen::VectorXd p_gains_; /*!< Proportional gains of the PID controller */ 
-    Eigen::VectorXd i_gains_; /*!< Derivative gains of the PID controller */
-    Eigen::VectorXd d_gains_; /*!< Integral gains of the PID controller */
-    Eigen::VectorXd torque_max_; /*!< Maximum allowable torque */
-    Eigen::VectorXd jnt_vel_max_; /*!< Maximum allowable joint velocity */
-    Eigen::VectorXd p_gains_qd_; /*!< Proportional gains of the regularisation controller */
-    Eigen::VectorXd joint_velocity_out_; /*!< Results of the QP optimization */
+    KDL::JntArrayVel q_in; /*!< @brief KDL joint position of the robot */
+    Eigen::VectorXd p_gains_; /*!< @brief Proportional gains of the PID controller */ 
+    Eigen::VectorXd i_gains_; /*!< @brief Derivative gains of the PID controller */
+    Eigen::VectorXd d_gains_; /*!< @brief Integral gains of the PID controller */
+    Eigen::VectorXd torque_max_; /*!< @brief Maximum allowable torque */
+    Eigen::VectorXd jnt_vel_max_; /*!< @brief Maximum allowable joint velocity */
+    Eigen::VectorXd p_gains_qd_; /*!< @brief Proportional gains of the regularisation controller */
+    Eigen::VectorXd joint_velocity_out_; /*!< @brief Results of the QP optimization */
 
-    Eigen::Matrix<double,6,1> xd_des_; /*!< Desired robot twist of the robot tip_link */
-    Eigen::Matrix<double,6,1> xd_curr_; /*!< Current robot twist of the robot tip_link */
-    Eigen::Matrix<double,6,1> x_curr_; /*!< Current robot pose of the robot tip_link */
+    Eigen::Matrix<double,6,1> xd_des_; /*!< @brief Desired robot twist of the robot tip_link */
+    Eigen::Matrix<double,6,1> xd_curr_; /*!< @brief Current robot twist of the robot tip_link */
+    Eigen::Matrix<double,6,1> x_curr_; /*!< @brief Current robot pose of the robot tip_link */
 
-    double regularisation_weight_; /*!< Regularisation weight */
-    int dof; /*!< Number of degrees of freedom of the robot */
+    double regularisation_weight_; /*!< @brief Regularisation weight */
+    int dof; /*!< @brief Number of degrees of freedom of the robot */
 
-    std::string root_link_; /*!< base link of the KDL chain */
-    std::string tip_link_; /*!< tip link of the KDL chain (usually the end effector*/
+    std::string root_link_; /*!< @brief base link of the KDL chain */
+    std::string tip_link_; /*!< @brief tip link of the KDL chain (usually the end effector*/
 
-    Eigen::Matrix<double,6,1> x_err; /*!< desired Cartesian error between the desired and current pose in Eigen */  
-    Eigen::Matrix <double,6,7> J; /*!< Jacobian in Eigen */  
-    Eigen::Matrix <double,7,7> M; /*!< Inertia matrix in joint space in Eigen */  
+    Eigen::Matrix<double,6,1> x_err; /*!< @brief desired Cartesian error between the desired and current pose in Eigen */  
+    Eigen::Matrix <double,6,7> J; /*!< @brief Jacobian in Eigen */  
+    Eigen::Matrix <double,7,7> M; /*!< @brief Inertia matrix in joint space in Eigen */  
 
     // Kinetic energy variables
-    Eigen::Matrix<double,6,6> Lambda_; /*!< Inertia Matrix in operation space in Eigen */  
-    double m_u; /*!< Projected mass in the direction of motion u */  
-    Eigen::Matrix<double,3,1> u; /*!< Direction of motion in Eigen*/  
-    KDL::Vector dir_; /*!< Direction of motion in KDL*/
-    double ec_lim; /*!< Maximum allowed kinetic energy*/
+    Eigen::Matrix<double,6,6> Lambda_; /*!< @brief Inertia Matrix in operation space in Eigen */  
+    double m_u; /*!< @brief Projected mass in the direction of motion u */  
+    Eigen::Matrix<double,3,1> u; /*!< @brief Direction of motion in Eigen*/  
+    KDL::Vector dir_; /*!< @brief Direction of motion in KDL*/
+    double ec_lim; /*!< @brief Maximum allowed kinetic energy*/
 
     // Matrices for qpOASES
     // NOTE: We need RowMajor (see qpoases doc)
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> H_; /*!< Hessian matrix of the QP*/
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> A_; /*!< Constraint matrix of the QP */
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> H_; /*!< @brief Hessian matrix of the QP*/
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> A_; /*!< @brief Constraint matrix of the QP */
 
-    Eigen::VectorXd g_; /*!< Gradient vector of the QP */
-    Eigen::VectorXd lb_; /*!< Lower bound vector of the QP */
-    Eigen::VectorXd ub_; /*!< Upper bound vector of the QP */
-    Eigen::VectorXd lbA_; /*!< Constraint lower bound vector of the QP */
-    Eigen::VectorXd ubA_; /*!< Constraint upper bound vector of the QP */
-    Eigen::VectorXd qd_min_; /*!< Minimum joint velocity limit vector*/
-    Eigen::VectorXd qd_max_; /*!< Maximum joint velocity limit vector*/
-    Eigen::VectorXd qdd_max_; /*!< Maximum joint acceleration limit vector*/
-    Eigen::VectorXd q_mean_; /*!< Mean joint position of the robot (for the regularization task*/
+    Eigen::VectorXd g_; /*!< @brief Gradient vector of the QP */
+    Eigen::VectorXd lb_; /*!< @brief Lower bound vector of the QP */
+    Eigen::VectorXd ub_; /*!< @brief Upper bound vector of the QP */
+    Eigen::VectorXd lbA_; /*!< @brief Constraint lower bound vector of the QP */
+    Eigen::VectorXd ubA_; /*!< @brief Constraint upper bound vector of the QP */
+    Eigen::VectorXd qd_min_; /*!< @brief Minimum joint velocity limit vector*/
+    Eigen::VectorXd qd_max_; /*!< @brief Maximum joint velocity limit vector*/
+    Eigen::VectorXd qdd_max_; /*!< @brief Maximum joint acceleration limit vector*/
+    Eigen::VectorXd q_mean_; /*!< @brief Mean joint position of the robot (for the regularization task*/
 
-    std::unique_ptr<qpOASES::SQProblem> qpoases_solver_; /*!< QP solver point*/
-    int number_of_constraints_; /*!< Number of constraints of the QP problem*/
-    int number_of_variables; /*!< Number of optimization variables of the QP problem*/
+    std::unique_ptr<qpOASES::SQProblem> qpoases_solver_; /*!< @brief QP solver point*/
+    int number_of_constraints_; /*!< @brief Number of constraints of the QP problem*/
+    int number_of_variables; /*!< @brief Number of optimization variables of the QP problem*/
     
     // Trajectory variables
-    bool publish_traj; /*!< Trajectory is published if true*/
-    bool play_traj_; /*!< Trajectory is played if true*/
-    double t_traj_curr; /*!< Current time along the trajectory*/
-    double init_dur; /*!< Time required to reach the begin of the trajectory from the robot initial position*/
-    KDL::Trajectory_Composite* ctraject; /*!< KDL composite trajectory object */
-    KDL::Path_RoundedComposite* path; /*!< KDL rounded composite path object */
-    KDL::VelocityProfile* velpref; /*!< KDL velocity profile object */
+    bool publish_traj; /*!< @brief Trajectory is published if true*/
+    bool play_traj_; /*!< @brief Trajectory is played if true*/
+    double t_traj_curr; /*!< @brief Current time along the trajectory*/
+    double init_dur; /*!< @brief Time required to reach the begin of the trajectory from the robot initial position*/
+    KDL::Trajectory_Composite* ctraject; /*!< @brief KDL composite trajectory object */
+    KDL::Path_RoundedComposite* path; /*!< @brief KDL rounded composite path object */
+    KDL::VelocityProfile* velpref; /*!< @brief KDL velocity profile object */
 
     // Human detection
-    double distance_to_contact; /*!< distance between the human and the workspace */
+    double distance_to_contact; /*!< @brief distance between the human and the workspace */
     
-    ros::Duration elapsed_time_; /*!< Time elapsed */
+    ros::Duration elapsed_time_; /*!< @brief Time elapsed */
 };
 }
 #endif // CONTROLLER_HPP
