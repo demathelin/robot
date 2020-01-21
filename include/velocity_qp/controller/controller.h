@@ -138,41 +138,57 @@ private:
     void init_publishers(ros::NodeHandle& node_handle);
     
     /**
-    * @brief Loads parameters from yaml file
+    * \fn void load_parameters
+    * \brief Loads parameters from yaml file
     */
     void load_parameters();
     
     /**
-    * @brief Callback routine to update human-robot distance
+    * \fn void distance_callback
+    * \brief Callback routine to update human-robot distance
+    * \param const std_msgs::Float32::ConstPtr& msg a float32 message representing the human-robot distance
     */
     void distance_callback(const std_msgs::Float32::ConstPtr& msg);
     
     /**
-    * @brief Callback routine for the dynamic reconfigure GUI
+    * \fn  void paramCallback
+    * \brief Callback routine for the dynamic reconfigure GUI
+    * \param velocity_qp::paramConfig& config the new robbbbbot config
+    * \param uint32_t level not used
     */
     void paramCallback(velocity_qp::paramConfig& config, uint32_t level);
     
     /**
-    * @brief Loads Panda robot
+    * \fn bool load_robot 
+    * \brief Loads Panda robot
+    * \param ros::NodeHandle& node_handle a ros node handle
+    * \return true if the robot is correctly loaded
     */
     bool load_robot(ros::NodeHandle& node_handle);
     
     /**
-    * @brief Publishes values
+    * \fn void do_publishing
+    * \brief Publishes values
+    * \return publish messages
     */
     void do_publishing();
     
     /**
-    * @brief Build the trajectory
+    * \fn void BuildTrajectory
+    * \brief Build the trajectory
+    * \param KDL::Frame X_curr_ the current pose of the robot
     */
     void BuildTrajectory(KDL::Frame X_curr_);
     
     // Dynamic reconfigure
-    std::unique_ptr<dynamic_reconfigure::Server<velocity_qp::paramConfig>> dynamic_server_params_;
-    ros::NodeHandle dynamic_reconfigure_params_node_;
+    std::unique_ptr<dynamic_reconfigure::Server<velocity_qp::paramConfig>> dynamic_server_params_; //dynamic reconfigure node
+    ros::NodeHandle dynamic_reconfigure_params_node_; //dynamic reconfigure node
     
     // Publishers
-    geometry_msgs::Pose X_curr_msg_,X_traj_msg_,fake_human_pose_msg_;
+    geometry_msgs::Pose X_curr_msg_
+                        ,X_traj_msg_
+                        ,fake_human_pose_msg_
+                        ;
     geometry_msgs::Twist X_err_msg_,Xd_msg_,Xdd_msg_,xd_des_msg_;  
     realtime_tools::RealtimePublisher<geometry_msgs::PoseArray> pose_array_publisher;
     realtime_tools::RealtimePublisher<nav_msgs::Path> path_publisher;

@@ -17,15 +17,23 @@ prepare:initialization:
   
   
 # builds  
-#build:release:u180464b:
-#  stage: build
-#  tags:
-#    - ci-auctus
-#    - u180464b
-#  script:
-#    - cd catkin_ws/
-#    - source /opt/ros/kinetic/setup.bash
-#    - catkin_make -j2 --force-cmake -DCMAKE_BUILD_TYPE=Release
+build:release:u180464b:
+  stage: build
+  tags:
+    - ci-auctus
+    - u180464b
+  script:
+    - mkdir -p ci_ws/src/velocity_qp
+    - shopt -s extglob
+    - mv !(ci_ws) ci_ws/src/velocity_qp
+    - cd ci_ws/src/
+    - git clone https://github.com/kuka-isir/qpOASES.git
+    - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@gitlab.inria.fr/auctus/panda/franka_description.git
+    - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@gitlab.inria.fr/auctus/panda/panda_traj.git
+    - cd ..
+    - catkin config --init --extend=/home/ci/soft/franka_ros_ws/devel --cmake-args -DFranka_DIR:PATH=/home/ci/soft/libfranka/build
+    - source /home/ci/soft/franka_ros_ws/devel/setup.bash
+    - catkin build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=--coverage
     
 build:debug:u180464b:
   stage: build
