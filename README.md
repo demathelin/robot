@@ -1,4 +1,4 @@
-[![pipeline status](https://gitlab.inria.fr/auctus/panda/velocity-qp/badges/master/pipeline.svg)](https://gitlab.inria.fr/auctus/panda/velocity-qp/commits/master)
+[![pipeline status](https://gitlab.inria.fr/auctus/panda/velocity_qp/badges/master/pipeline.svg)](https://gitlab.inria.fr/auctus/panda/velocity-qp/commits/master)
 [![Quality Gate](https://sonarqube.inria.fr/sonarqube/api/badges/gate?key=auctus:panda:velocity-qp)](https://sonarqube.inria.fr/sonarqube/dashboard/index/auctus:panda:velocity-qp)
 [![Coverage](https://sonarqube.inria.fr/sonarqube/api/badges/measure?key=auctus:panda:velocity-qp&metric=coverage)](https://sonarqube.inria.fr/sonarqube/dashboard/index/auctus:panda:velocity-qp)
 
