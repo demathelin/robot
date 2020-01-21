@@ -68,7 +68,6 @@ bool Controller::init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eige
     //--------------------------------------
     BuildTrajectory(X_curr_);
     t_traj_curr += 0.001;
-    X_last_ = X_curr_;
     return true;
 }
 
@@ -209,7 +208,6 @@ void Controller::BuildTrajectory(KDL::Frame X_curr_)
     ctraject = new Trajectory_Composite();
 
     KDL::Frame frame1,frame2,frame3;
-    X_last_ = X_curr_;
     frame1 = X_curr_;
 
     frame2 = KDL::Frame( frame1.M, KDL::Vector(0.4,0.25,0.4)  );
