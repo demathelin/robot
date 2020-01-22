@@ -33,7 +33,14 @@ A generic low-level joint velocity controller with a QP formulation.
 
 `roslaunch velocity_qp run.launch`
 
+## Optional parameter : 
+
+`robot_ip` IP adress of the panda robot
+`load_gripper` if **True** the gripper is loaded in the xacro descritpion file and the gripper action server is instantiated.
+`sim` Run the code in simulation on Gazebo
+
 `roslaunch velocity_qp run.launch sim:=true` in simulation mode
+
 
 # Some installation requirement
 
