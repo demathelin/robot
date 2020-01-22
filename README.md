@@ -20,14 +20,15 @@
 A generic low-level joint velocity controller with a QP formulation.
 
 # Installation
-
-1. Configure a catkin workspace
-2. `cd catkin_ws/src`
-3. `git clone git@gitlab.inria.fr:auctus/panda/velocity_qp.git`
-3. `wstool init ../`
-4. `wstool merge velocity_qp_dep.rosinstall`
-5. `wstool update`
-5. `catkin build`
+1. `sudo apt install python-wstool`
+2. Follow the installation instruction of the fraka ros package : https://frankaemika.github.io/docs/installation_linux.html#installing-from-the-ros-repositories
+3. (optional) Configure a catkin workspace that extends the previous workspace
+4. `cd catkin_ws/src`
+5. `git clone git@gitlab.inria.fr:auctus/panda/velocity_qp.git`
+5. `wstool init `
+6. `wstool merge velocity_qp/velocity_qp_dep.rosinstall`
+7. `wstool update`
+8. `catkin build`
 
 # Usage
 
@@ -36,7 +37,9 @@ A generic low-level joint velocity controller with a QP formulation.
 ## Optional parameter : 
 
 `robot_ip` IP adress of the panda robot
+
 `load_gripper` if **True** the gripper is loaded in the xacro descritpion file and the gripper action server is instantiated.
+
 `sim` Run the code in simulation on Gazebo
 
 `roslaunch velocity_qp run.launch sim:=true` in simulation mode
