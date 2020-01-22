@@ -19,7 +19,24 @@
 
 A generic low-level joint velocity controller with a QP formulation.
 
+# Installation
+
+1. Configure a catkin workspace
+2. `cd catkin_ws/src`
+3. `git clone git@gitlab.inria.fr:auctus/panda/velocity_qp.git`
+3. `wstool init ../`
+4. `wstool merge velocity_qp_dep.rosinstall`
+5. `wstool update`
+5. `catkin build`
+
+# Usage
+
+`roslaunch velocity_qp run.launch`
+
+`roslaunch velocity_qp run.launch sim:=true` in simulation mode
+
 # Some installation requirement
+
 `sudo apt install ros-melodic-track-ik`
 
 `sudo apt install ros-melodic-eigen-conversions`
