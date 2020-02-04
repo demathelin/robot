@@ -24,7 +24,7 @@ build:release:u180464b:
     - ci-auctus
     - u180464b
   script:
-    - ls /usr/local/lib/
+    - ls -l /usr/local/lib/
     - mkdir -p ci_ws/src/velocity_qp
     - shopt -s extglob
     - mv !(ci_ws) ci_ws/src/velocity_qp
