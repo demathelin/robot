@@ -13,6 +13,7 @@ prepare:initialization:
     - u180464b
   script:
     - echo ci | sudo -S mv /usr/local/lib/libexpat.so.1 /usr/local/lib/libexpat.so.1.bak && echo $?;echo $?;
+    - echo ci | sudo -S mv /usr/local/lib/libexpat.so.1.5.2 /usr/local/lib/libexpat.so.1.5.2.bak && echo $?;echo $?;
   allow_failure: true
   
   
