@@ -31,6 +31,7 @@ A generic low-level joint velocity controller with a QP formulation.
 9. `rosdep install --from-paths src --ignore-src -r -y`
 10. `catkin build`
 11. `source catkin_wd/devel/setup.bash`
+12. Add in your bashrc `export GAZEBO_RESOURCE_PATH=/usr/share/gazebo-9:~/catkin_ws/src/auctuspanda/franka_description/worlds` and `export GAZEBO_MODEL_PATH=~/catkin_ws/src/auctuspanda/franka_description/robots`
 
 # Usage
 
