@@ -25,14 +25,34 @@ A generic low-level joint velocity controller with a QP formulation.
 3. (optional) Configure a catkin workspace that extends the previous workspace
 4. `cd catkin_ws/src`
 5. `git clone git@gitlab.inria.fr:auctus/panda/velocity_qp.git`
-5. `wstool init `
-6. `wstool merge velocity_qp/velocity_qp_dep.rosinstall`
-7. `wstool update`
-8. `catkin build`
+6. `wstool init `
+7. `wstool merge velocity_qp/velocity_qp_dep.rosinstall`
+8. `wstool update`
+9. `rosdep install --from-paths src --ignore-src -r -y`
+10. `catkin build`
+11. `source catkin_wd/devel/setup.bash`
 
 # Usage
 
-`roslaunch velocity_qp run.launch`
+In simulation 
+
+`roslaunch velocity_qp run.launch sim:=true`
+
+On the real robot
+
+`roslaunch velocity_qp run.launch robot_ip:=your_robot_ip`
+
+Load a new trajectory online (stored in panda_traj/trajectories/name_of_the_trajectory.csv)
+
+`rosrun velocity_qp load_trajectory.py name_of_the_trajectory`
+
+Play the trajectory (you can also use rqt to call the service)
+
+`rosservice call /velocity_qp/updateUI "play_traj : true"`
+
+Publish the trajectory 
+
+`rosservice call /velocity_qp/updateUI "publish_traj : true"`
 
 ## Optional parameter : 
 
