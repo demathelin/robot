@@ -1,8 +1,8 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 
-#ifndef PANDA_CONTROL_H
-#define PANDA_CONTROL_H
+#ifndef VELOCITY_QP_H
+#define VELOCITY_QP_H
 
 #pragma once
 
@@ -20,7 +20,6 @@
 
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
-#include <franka_control/services.h>
 
 
 #include <franka/robot.h>
@@ -71,4 +70,4 @@ private:
 
 }  // namespace velocity_qp
 
-#endif // PANDA_CONTROL_H
+#endif // VELOCITY_QP_H

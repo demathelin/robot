@@ -16,6 +16,7 @@
     </group>
     
     <group if="$(arg sim)">
+        <remap from="/velocity_qp/joint_states" to="/joint_states" />
         <node name="killgazebo" pkg="velocity_qp" type="killgazebo" output="screen" />
         <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -40,6 +41,6 @@
             args="-param robot_description
                 -urdf
                 -model panda"/>
-<!--         <node name="rviz" pkg="rviz" type="rviz" /> -->
+
     </group>
 </launch>

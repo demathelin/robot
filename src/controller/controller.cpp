@@ -38,10 +38,6 @@ bool Controller::Init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eige
     lbA_.resize(number_of_constraints_);
     ubA_.resize(number_of_constraints_);
     joint_velocity_out_.resize(dof);
-    gravity_kdl.resize(dof);
-    play_traj_ = false;
-    t_traj_curr = 0;
-    dir_ = KDL::Vector(0.0,1.0,0.0); // Initialize direction vector
     
     //--------------------------------------
     // QPOASES
@@ -61,17 +57,23 @@ bool Controller::Init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eige
     
     q_in.q.data = q_init;
     q_in.qdot.data = qd_init;
-    fksolver_->JntToCart(q_in.q,X_curr_,8);
+    fksolver_->JntToCart(q_in.q,X_curr_);
     
+     //--------------------------------------
+    // BUILD TRAJECTORY
     //--------------------------------------
-    // BUILD TRAJECTORY 
-    //--------------------------------------
-    BuildTrajectory(X_curr_);
-    t_traj_curr += 0.001;
+    std::string trajectory_file = "/home/lucas/panda_ws/src/auctuspanda/panda_traj/trajectories/go_to_point.csv";
+    std::string csv_file_name = trajectory_file;
+    trajectory.Load(csv_file_name);
+    trajectory.Build(X_curr_, true);
+    ROS_DEBUG_STREAM(" Trajectory computed ");
+    ros::param::set("racer_control/Traj_duration", trajectory.Duration());
+    ros::param::set("racer_control/Init_duration", trajectory.ResetDuration());
+
     return true;
 }
 
-std::tuple<Eigen::VectorXd, Eigen::VectorXd>Controller::update(Eigen::VectorXd q, Eigen::VectorXd qd, const ros::Duration& period)
+Eigen::VectorXd Controller::update(Eigen::VectorXd q, Eigen::VectorXd qd, const ros::Duration& period)
 {
     double time_dt = period.toSec();
     
@@ -79,28 +81,14 @@ std::tuple<Eigen::VectorXd, Eigen::VectorXd>Controller::update(Eigen::VectorXd q
     q_in.q.data = q;
     q_in.qdot.data = qd;
 
-    chainjacsolver_->JntToJac(q_in.q,J_,8);
-    fksolver_->JntToCart(q_in.q,X_curr_,8);
-    fksolvervel_->JntToCart(q_in,Xd_curr_,8);
-    dynModelSolver_->JntToMass(q_in.q,M_);
-    dynModelSolver_->JntToGravity(q_in.q, gravity_kdl);
+    chainjacsolver_->JntToJac(q_in.q,J_);
+    fksolver_->JntToCart(q_in.q,X_curr_);
 
-    // Increment trajectory
-    if (play_traj_)
-    {
-        ROS_INFO_ONCE(" Playing trajectory " );
-        t_traj_curr += 0.001;
-        if (t_traj_curr > ctraject->Duration())
-        {
-            t_traj_curr = init_dur;
-        }
+    trajectory.updateTrajectory(traj_properties_, time_dt);
+    if (traj_properties_.move_)
+        traj_properties_.move_ = false;
+    X_traj_ = trajectory.Pos();
 
-    }
-    
-    X_traj_ = ctraject->Pos(t_traj_curr);
-    
-//     ROS_ERROR_STREAM_ONCE(" X_traj_: " << X_traj_.p(0) << " " <<  X_traj_.p(1) << " "  << X_traj_.p(2));
-    
     // Proportionnal controller 
     X_err_ = diff( X_curr_ , X_traj_ ); 
     tf::twistKDLToEigen(X_err_,x_err);
@@ -112,10 +100,8 @@ std::tuple<Eigen::VectorXd, Eigen::VectorXd>Controller::update(Eigen::VectorXd q
     J = J_.data;
     M = M_.data;
     
-    
     H_ =  2.0 * regularisation_weight_ * Eigen::MatrixXd::Identity(7,7);
     g_ = -2.0 * regularisation_weight_ * p_gains_qd_.cwiseProduct((q_mean_ - q));
-    
 
     H_ +=  2.0 *  J.transpose() * J;
     g_ += -2.0 *  J.transpose() * xd_des_;
@@ -128,41 +114,6 @@ std::tuple<Eigen::VectorXd, Eigen::VectorXd>Controller::update(Eigen::VectorXd q
     A_.block(0,0,7,7) = horizon_dt * Eigen::MatrixXd::Identity(7,7);    
     ubA_.segment(0,7) = ul.data - q;
     lbA_.segment(0,7) = ll.data - q;
-    
-    //Get direction of motion
-    X_traj_next = ctraject->Pos(t_traj_curr + 0.001); //Get next point along the trajectory
-    if (X_traj_next != X_traj_)
-    {
-        dir_ = KDL::diff(X_traj_next.p,X_traj_.p); 
-        double dir_n = dir_.Normalize();
-        if (dir_n !=0) 
-            tf::vectorKDLToEigen(dir_,u);
-    }
-    
-    Lambda_ = ( J *  M.inverse() * J.transpose() ).inverse();
-    m_u = u.transpose() * Lambda_.block(0,0,3,3) * u;
-    
-    //ec_lim as a function of the distance between the human and the robot worskspace
-    double human_min_dist_= 0;
-    double human_max_dist_= 3.5;
-    double ec_safe = 0;
-    double ec_max = 1;
-    if (distance_to_contact <= human_min_dist_)
-      ec_lim = ec_safe;
-    if (distance_to_contact >= human_max_dist_)
-      ec_lim = ec_max;
-    if ((distance_to_contact < human_max_dist_)&&(distance_to_contact >human_min_dist_))
-      ec_lim = ec_safe + (distance_to_contact-human_min_dist_) * (ec_max-ec_safe)/(human_max_dist_-human_min_dist_);
-  
-    
-    
-    // Kinetic energy constraint 
-    //-sqrt(ec_max) < sqrt(0.5 m_u) v_u  < sqrt(ec_max);
-    
-    A_.block(dof,0,1,dof) = sqrt(0.5*m_u) * u.transpose() * J.block(0,0,3,7);
-    ubA_(dof) =  sqrt(ec_lim);
-    lbA_(dof) = -sqrt(ec_lim);
-
     
     // number of allowed compute steps
     int nWSR = 1e6;
@@ -198,61 +149,46 @@ std::tuple<Eigen::VectorXd, Eigen::VectorXd>Controller::update(Eigen::VectorXd q
     do_publishing();
 
 
-    return std::make_tuple(joint_velocity_out_, gravity_kdl.data);
+    return joint_velocity_out_;
     // return joint_velocity_out_;
   
 }
 
 void Controller::BuildTrajectory(KDL::Frame X_curr_)
 {
-    ctraject = new Trajectory_Composite();
+    trajectory.Build(X_curr_, false);
+    publishTrajectory();
+}
 
-    KDL::Frame frame1,frame2,frame3;
-    frame1 = X_curr_;
+void Controller::publishTrajectory()
+{
+    panda_traj::PublishTraj publish_traj_;
+    publish_traj_ = trajectory.publishTrajectory();
 
-    frame2 = KDL::Frame( frame1.M, KDL::Vector(0.4,0.25,0.4)  );
+    nav_msgs::Path path_ros;
+    path_ros.poses = publish_traj_.path_ros_.poses;
+    path_ros.header.frame_id = root_link_;
+    path_ros.header.stamp = ros::Time::now();
+    geometry_msgs::PoseArray pose_array;
+    pose_array.poses = publish_traj_.pose_array_.poses;
+    pose_array.header.frame_id = root_link_;
+    pose_array.header.stamp = ros::Time::now();
 
-    frame3 = KDL::Frame( frame1.M, KDL::Vector(0.4,-0.25,0.4) );
-
-
-    double radius = 0.01;
-    double eqradius = 0.05;
-    double vmax = 0.5;
-    double accmax = 0.5;
-    path = new KDL::Path_RoundedComposite(radius,eqradius,new KDL::RotationalInterpolation_SingleAxis());
-    path->Add(frame1);
-    path->Add(frame2);
-    path->Finish();
-
-    velpref = new KDL::VelocityProfile_Trap(vmax,accmax);
-    velpref->SetProfile(0,path->PathLength());
-    init_dur = velpref -> Duration();
-    ctraject -> Add (new KDL::Trajectory_Segment(path, velpref));
-
-    ctraject -> Add (new KDL::Trajectory_Stationary(1,frame2));
-
-    path = new KDL::Path_RoundedComposite(radius,eqradius,new KDL::RotationalInterpolation_SingleAxis());
-    path->Add(frame2);
-    path->Add(frame3);
-    path->Finish();
-
-    velpref = new KDL::VelocityProfile_Trap(vmax,accmax);
-    velpref->SetProfile(0,path->PathLength());
-    ctraject -> Add (new KDL::Trajectory_Segment(path, velpref));
-
-    ctraject -> Add (new KDL::Trajectory_Stationary(1,frame3));
-
-    path = new KDL::Path_RoundedComposite(radius,eqradius,new KDL::RotationalInterpolation_SingleAxis());
-    path->Add(frame3);
-    path->Add(frame2);
-    path->Finish();
-
-    velpref = new KDL::VelocityProfile_Trap(vmax,accmax);
-    velpref->SetProfile(0,path->PathLength());
-    ctraject -> Add (new KDL::Trajectory_Segment(path, velpref));
-
-    ROS_INFO_STREAM(" Trajectory computed " );
-   
+    if (pose_array_publisher.trylock())
+    {
+        pose_array_publisher.msg_.header.stamp = ros::Time::now();
+        pose_array_publisher.msg_.header.frame_id = root_link_;
+        pose_array_publisher.msg_ = pose_array;
+        pose_array_publisher.unlockAndPublish();
+    }
+    if (path_publisher.trylock())
+    {
+        path_publisher.msg_.header.stamp = ros::Time::now();
+        path_publisher.msg_.header.frame_id = root_link_;
+        path_publisher.msg_ = path_ros;
+        path_publisher.unlockAndPublish();
+    }
+    ROS_INFO_STREAM(" Trajectory published ");
 }
 
 void Controller::init_publishers(ros::NodeHandle& node_handle){
@@ -260,8 +196,6 @@ void Controller::init_publishers(ros::NodeHandle& node_handle){
     pose_array_publisher.init(node_handle, "Pose_array", 1);
     path_publisher.init(node_handle, "Ros_Path", 1);    
     panda_rundata_publisher.init(node_handle, "panda_rundata", 1);
-    human_workspace_dist_sub = node_handle.subscribe("/Laser_workspace_distance",1000, &Controller::distance_callback, this);
-
 }
 
 void Controller::load_parameters(){    
@@ -276,10 +210,6 @@ void Controller::load_parameters(){
     getRosParam("/velocity_qp/d_gains_",d_gains_);
     p_gains_qd_.resize(7);
     getRosParam("/velocity_qp/p_gains_qd_",p_gains_qd_);
-    torque_max_.resize(7);
-    getRosParam("/velocity_qp/torque_max_",torque_max_);
-    qdd_max_.resize(7);
-    getRosParam("/velocity_qp/qdd_max_",qdd_max_);
     q_mean_.resize(7);
     getRosParam("/velocity_qp/q_mean_",q_mean_);
     getRosParam("/velocity_qp/regularisation_weight_",regularisation_weight_);
@@ -288,12 +218,11 @@ void Controller::load_parameters(){
     ROS_INFO_STREAM ( "------------- Parameters Loaded -------------" );
 } 
 
-bool Controller::load_robot(ros::NodeHandle& node_handle){
+bool Controller::load_robot(ros::NodeHandle& node_handle)
+{
+    updateUI_service = node_handle.advertiseService("updateUI", &Controller::updateUI, this);
+    updateTraj_service = node_handle.advertiseService("updateTrajectory", &Controller::updateTrajectory, this); 
 
-    dynamic_reconfigure_params_node_ = ros::NodeHandle("dynamic_params_node");
-    dynamic_server_params_ = std::make_unique<dynamic_reconfigure::Server<velocity_qp::paramConfig>>(dynamic_reconfigure_params_node_);
-    dynamic_server_params_->setCallback(boost::bind(&Controller::paramCallback, this, _1, _2));
-    
     // get robot descritpion
     double timeout;
     node_handle.param("timeout", timeout, 0.005);
@@ -328,48 +257,81 @@ bool Controller::load_robot(ros::NodeHandle& node_handle){
     fksolver_.reset(new KDL::ChainFkSolverPos_recursive(chain));
     fksolvervel_.reset(new KDL::ChainFkSolverVel_recursive(chain));
     chainjacsolver_.reset(new KDL::ChainJntToJacSolver(chain)); 
-    dynModelSolver_.reset(new KDL::ChainDynParam(chain, KDL::Vector(0.,0.,-9.81)));
+
     dof = chain.getNrOfJoints();
     number_of_variables = dof;
-    number_of_constraints_ = dof+1;
+    number_of_constraints_ = dof;
+
     ROS_INFO_STREAM ( "Number of variables : " << number_of_variables );
     ROS_INFO_STREAM ( "Number of constraints : " << number_of_constraints_);
     
     return true;
 }
 
-void Controller::do_publishing(){
+void Controller::do_publishing()
+{
     // Publishing
-    tf::poseKDLToMsg(X_curr_,X_curr_msg_);
-    tf::poseKDLToMsg(X_traj_,X_traj_msg_);
-    tf::twistKDLToMsg(X_err_,X_err_msg_);
-    tf::twistEigenToMsg(xd_des_,xd_des_msg_);
-    if (panda_rundata_publisher.trylock()){
+    tf::poseKDLToMsg(X_curr_, X_curr_msg_);
+    tf::poseKDLToMsg(X_traj_, X_traj_msg_);
+    tf::twistKDLToMsg(X_err_, X_err_msg_);
+    if (panda_rundata_publisher.trylock())
+    {
         panda_rundata_publisher.msg_.header.stamp = ros::Time::now();
         panda_rundata_publisher.msg_.header.frame_id = root_link_;
-        panda_rundata_publisher.msg_.ec_max = ec_lim;
-        panda_rundata_publisher.msg_.ec_pred = (A_.block(dof,0,1,dof) * joint_velocity_out_)(0)*(A_.block(dof,0,1,dof) * joint_velocity_out_)(0) ;            
-        panda_rundata_publisher.msg_.t_traj_curr = t_traj_curr;
-        panda_rundata_publisher.msg_.m_u = m_u;
-        panda_rundata_publisher.msg_.X_curr = X_curr_msg_;
-        panda_rundata_publisher.msg_.X_traj = X_traj_msg_;
         panda_rundata_publisher.msg_.X_err = X_err_msg_;
-        panda_rundata_publisher.msg_.Xd_control = xd_des_msg_;
+        panda_rundata_publisher.msg_.play_traj_ = traj_properties_.play_traj_;
+        panda_rundata_publisher.msg_.tune_gains_ = traj_properties_.gain_tunning_ ;
         panda_rundata_publisher.unlockAndPublish();
-    }    
+    }
+
+  if (pose_curr_publisher.trylock())
+  {
+    tf::poseKDLToMsg(X_curr_, X_curr_msg_);
+    geometry_msgs::PoseStamped X_curr_stamp;
+    pose_curr_publisher.msg_.header.stamp = ros::Time::now();
+    pose_curr_publisher.msg_.header.frame_id = root_link_;
+    pose_curr_publisher.msg_.pose = X_curr_msg_;
+    pose_curr_publisher.unlockAndPublish();
+  }
+
+  if (pose_des_publisher.trylock())
+  {
+    tf::poseKDLToMsg(X_traj_, X_traj_msg_);
+    geometry_msgs::PoseStamped X_des_stamp;
+    pose_des_publisher.msg_.header.stamp = ros::Time::now();
+    pose_des_publisher.msg_.header.frame_id = root_link_;
+    pose_des_publisher.msg_.pose = X_traj_msg_;
+    pose_des_publisher.unlockAndPublish();
+  }
 }
 
-void Controller::paramCallback(velocity_qp::paramConfig& config, uint32_t) {
-    
-    play_traj_ = config.play_traj;
-    distance_to_contact = config.human_distance;
-    
-}
 
-void Controller::distance_callback(const std_msgs::Float32::ConstPtr& msg)
+bool Controller::updateUI(velocity_qp::UI::Request &req, velocity_qp::UI::Response &resp)
 {
-    distance_to_contact = msg->data;
-//     new_distance_acquired = true;
+    traj_properties_.play_traj_ = req.play_traj;
+    if (req.publish_traj)
+        publishTrajectory();
+    if (req.build_traj)
+        BuildTrajectory(X_curr_);
+
+    if (req.exit_)
+    {
+        ros::shutdown();
+        exit(0);
+    } 
+    resp.result = true;
+
+    return true;
+}
+
+bool Controller::updateTrajectory(panda_traj::UpdateTrajectory::Request& req, panda_traj::UpdateTrajectory::Response& resp){
+
+  trajectory.Load(req.csv_traj_path);
+  trajectory.Build(X_curr_, req.verbose);
+  publishTrajectory();
+  std::cout << "Received waypoint computing traj and publishing" << std::endl;
+
+  return true;
 }
 
 }

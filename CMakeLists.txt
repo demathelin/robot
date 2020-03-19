@@ -9,17 +9,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
+  panda_traj
   controller_interface
   geometry_msgs
   realtime_tools
-  dynamic_reconfigure
   franka_hw
   franka_control
   franka_gripper
   hardware_interface
   pluginlib
   roscpp
-  rospy  trac_ik_lib
+  rospy  
+  trac_ik_lib
   qpOASES
   kdl_conversions
   eigen_conversions
@@ -35,23 +36,27 @@ find_package(orocos_kdl REQUIRED)
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
 
-generate_dynamic_reconfigure_options(
-  cfg/param.cfg
-)
 
 add_message_files(
   FILES
   PandaRunMsg.msg
 )
 
+add_service_files(
+  FILES
+  UI.srv
+)
+
 generate_messages(
   DEPENDENCIES
   std_msgs
   geometry_msgs
+  sensor_msgs
 )
 
 add_library(${PROJECT_NAME} 
   src/controller/controller.cpp
+  src/controller/load_trajectory.py
   src/robot/panda_control.cpp
   src/robot/panda_simulation.cpp
 )

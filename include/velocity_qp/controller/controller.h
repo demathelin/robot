@@ -37,15 +37,12 @@
 #include <fstream>
 
 #include <controller_interface/multi_interface_controller.h>
-#include <dynamic_reconfigure/server.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <hardware_interface/joint_command_interface.h>
-#include <hardware_interface/robot_hw.h>
 #include <ros/node_handle.h>
 #include <ros/time.h>
 #include <Eigen/Dense>
 
-#include <velocity_qp/paramConfig.h>
+#include <velocity_qp/UI.h>
+#include <velocity_qp/PandaRunMsg.h>
 
 #include <qpOASES.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -58,32 +55,18 @@
 #include <kdl/jacobian.hpp>
 #include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/jntspaceinertiamatrix.hpp>
-#include <kdl/chaindynparam.hpp>
 
-#include <kdl/path_roundedcomposite.hpp>
-#include <kdl/path_line.hpp>
-#include <kdl/trajectory_composite.hpp>
-#include <kdl/trajectory_stationary.hpp>
-#include <kdl/trajectory.hpp>
-#include <kdl/trajectory_segment.hpp>
-#include <kdl/rotational_interpolation_sa.hpp>
-#include <kdl/utilities/error.h>
-#include <kdl/velocityprofile_trap.hpp>
-#include <kdl/velocityprofile_rect.hpp>
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/TwistStamped.h>
-#include <std_msgs/Float32.h>
-#include <std_msgs/Int32.h>
-#include <std_msgs/Float64MultiArray.h>
 #include <realtime_tools/realtime_publisher.h>
 
-#include <velocity_qp/PandaRunMsg.h>
 
 #include <kdl_conversions/kdl_msg.h>
 #include <eigen_conversions/eigen_kdl.h>
 #include <eigen_conversions/eigen_msg.h>
+#include <panda_traj/panda_traj.hpp>
+
 
 namespace Controller {
     /**
@@ -109,7 +92,7 @@ public:
         * \param const ros::Duration& period the refresh rate of the control
         * \return A std::tupe with the desired joint velocity and information on the qp solver
         */
-        std::tuple<Eigen::VectorXd, Eigen::VectorXd> update(Eigen::VectorXd q, Eigen::VectorXd qd, const ros::Duration& period);
+        Eigen::VectorXd update(Eigen::VectorXd q, Eigen::VectorXd qd, const ros::Duration& period);
 
 private:
     
@@ -162,22 +145,7 @@ private:
     * \brief Loads parameters from yaml file
     */
     void load_parameters();
-    
-    /**
-    * \fn void distance_callback
-    * \brief Callback routine to update human-robot distance
-    * \param const std_msgs::Float32::ConstPtr& msg a float32 message representing the human-robot distance
-    */
-    void distance_callback(const std_msgs::Float32::ConstPtr& msg);
-    
-    /**
-    * \fn  void paramCallback
-    * \brief Callback routine for the dynamic reconfigure GUI
-    * \param velocity_qp::paramConfig& config the new robot config
-    * \param uint32_t level not used
-    */
-    void paramCallback(velocity_qp::paramConfig& config, uint32_t level);
-    
+   
     /**
     * \fn bool load_robot 
     * \brief Loads Panda robot
@@ -199,31 +167,32 @@ private:
     * \param KDL::Frame X_curr_ the current pose of the robot
     */
     void BuildTrajectory(KDL::Frame X_curr_);
+
+    /**
+    * @brief Publish the trajectory
+    */
+    void publishTrajectory();
+
+    bool updateUI(velocity_qp::UI::Request& req, velocity_qp::UI::Response& resp);
+
+    bool updateTrajectory(panda_traj::UpdateTrajectory::Request &req, panda_traj::UpdateTrajectory::Response &resp);
     
-    // Dynamic reconfigure
-    std::unique_ptr<dynamic_reconfigure::Server<velocity_qp::paramConfig>> dynamic_server_params_; //dynamic reconfigure node
-    ros::NodeHandle dynamic_reconfigure_params_node_; //dynamic reconfigure node
     
     // Publishers
     geometry_msgs::Pose X_curr_msg_
-                        ,X_traj_msg_
-                        ,fake_human_pose_msg_
-                        ;
-    geometry_msgs::Twist X_err_msg_,Xd_msg_,Xdd_msg_,xd_des_msg_;  
+                        ,X_traj_msg_;
+    geometry_msgs::Twist X_err_msg_;  
     realtime_tools::RealtimePublisher<geometry_msgs::PoseArray> pose_array_publisher;
     realtime_tools::RealtimePublisher<nav_msgs::Path> path_publisher;
     realtime_tools::RealtimePublisher<velocity_qp::PandaRunMsg> panda_rundata_publisher;
+    realtime_tools::RealtimePublisher<geometry_msgs::PoseStamped> pose_curr_publisher, pose_des_publisher;
     
-    // Subscribers
-    ros::Subscriber human_workspace_dist_sub;
+    ros::ServiceServer updateUI_service,
+                       updateTraj_service;
     
     boost::shared_ptr<TRAC_IK::TRAC_IK> ik_solver;
+
     boost::scoped_ptr<KDL::ChainJntToJacSolver> chainjacsolver_;
-    
-    /**
-    * @brief The dynamic solver.
-    */
-    boost::scoped_ptr<KDL::ChainDynParam> dynModelSolver_;
     
     /**
     * @brief The forward kinematic solver for position
@@ -240,7 +209,6 @@ private:
     KDL::Chain chain; /*!< @brief KDL chain corresponding to the robot */  
     KDL::JntArray ll; /*!< @brief Joint lower limits vector*/  
     KDL::JntArray ul; /*!< @brief Joint upper limits vector*/   
-    KDL::JntArray gravity_kdl; /*!< @brief KDL gravity vector  */
 
     KDL::Jacobian J_; /*!< @brief KDL gravity vector  */
 
@@ -248,25 +216,17 @@ private:
 
     KDL::Frame X_curr_; /*!< @brief KDL current Cartesian pose of the tip_link */
     KDL::Frame X_traj_; /*!< @brief KDL desired Cartesian pose of the tip_link */
-    KDL::Frame X_traj_next; /*!< @brief Previous KDL desired Cartesian pose of the tip_link */
-    
-    KDL::FrameVel Xd_curr_; /*!< @brief KDL current Cartesian twist of the tip_link */
 
-    KDL::Twist Xd_traj_;  /*!< @brief KDL desired Cartesian twist of the tip_link */
-    KDL::Twist Xdd_traj_; /*!< @brief KDL desired Cartesian acceleration of the tip_link */
     KDL::Twist X_err_; /*!< @brief KDL desired Cartesian error between the desired and current pose */
 
     KDL::JntArrayVel q_in; /*!< @brief KDL joint position of the robot */
     Eigen::VectorXd p_gains_; /*!< @brief Proportional gains of the PID controller */ 
     Eigen::VectorXd i_gains_; /*!< @brief Derivative gains of the PID controller */
     Eigen::VectorXd d_gains_; /*!< @brief Integral gains of the PID controller */
-    Eigen::VectorXd torque_max_; /*!< @brief Maximum allowable torque */
-    Eigen::VectorXd jnt_vel_max_; /*!< @brief Maximum allowable joint velocity */
     Eigen::VectorXd p_gains_qd_; /*!< @brief Proportional gains of the regularisation controller */
     Eigen::VectorXd joint_velocity_out_; /*!< @brief Results of the QP optimization */
 
     Eigen::Matrix<double,6,1> xd_des_; /*!< @brief Desired robot twist of the robot tip_link */
-    Eigen::Matrix<double,6,1> xd_curr_; /*!< @brief Current robot twist of the robot tip_link */
     Eigen::Matrix<double,6,1> x_curr_; /*!< @brief Current robot pose of the robot tip_link */
 
     double regularisation_weight_; /*!< @brief Regularisation weight */
@@ -278,13 +238,6 @@ private:
     Eigen::Matrix<double,6,1> x_err; /*!< @brief desired Cartesian error between the desired and current pose in Eigen */  
     Eigen::Matrix <double,6,7> J; /*!< @brief Jacobian in Eigen */  
     Eigen::Matrix <double,7,7> M; /*!< @brief Inertia matrix in joint space in Eigen */  
-
-    // Kinetic energy variables
-    Eigen::Matrix<double,6,6> Lambda_; /*!< @brief Inertia Matrix in operation space in Eigen */  
-    double m_u; /*!< @brief Projected mass in the direction of motion u */  
-    Eigen::Matrix<double,3,1> u; /*!< @brief Direction of motion in Eigen*/  
-    KDL::Vector dir_; /*!< @brief Direction of motion in KDL*/
-    double ec_lim; /*!< @brief Maximum allowed kinetic energy*/
 
     // Matrices for qpOASES
     // NOTE: We need RowMajor (see qpoases doc)
@@ -306,18 +259,8 @@ private:
     int number_of_variables; /*!< @brief Number of optimization variables of the QP problem*/
     
     // Trajectory variables
-    bool publish_traj; /*!< @brief Trajectory is published if true*/
-    bool play_traj_; /*!< @brief Trajectory is played if true*/
-    double t_traj_curr; /*!< @brief Current time along the trajectory*/
-    double init_dur; /*!< @brief Time required to reach the begin of the trajectory from the robot initial position*/
-    KDL::Trajectory_Composite* ctraject; /*!< @brief KDL composite trajectory object */
-    KDL::Path_RoundedComposite* path; /*!< @brief KDL rounded composite path object */
-    KDL::VelocityProfile* velpref; /*!< @brief KDL velocity profile object */
-
-    // Human detection
-    double distance_to_contact; /*!< @brief distance between the human and the workspace */
-    
-    ros::Duration elapsed_time_; /*!< @brief Time elapsed */
+    TrajectoryGenerator trajectory;
+    panda_traj::TrajProperties traj_properties_;
 };
 }
 #endif // CONTROLLER_HPP

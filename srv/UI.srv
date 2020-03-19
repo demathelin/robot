@@ -1,0 +1,16 @@
+bool play_traj
+bool jog_robot
+bool publish_traj 
+bool build_traj
+bool positioning_
+geometry_msgs/Twist p_gains_
+geometry_msgs/Twist d_gains_
+bool move_signal_
+bool tune_gain
+float64 amplitude
+int64 axis
+bool exit_
+float64 distance_to_contact_
+bool fake_distance_
+---
+bool result

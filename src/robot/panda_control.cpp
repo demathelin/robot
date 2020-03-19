@@ -144,7 +144,7 @@ void PandaController::update(const ros::Time&, const ros::Duration& period) {
     // joint_command_ = qp.update(q_,qd_,period);
     Eigen::VectorXd gravity_comp;
     gravity_comp.resize(7);
-    std::tie(joint_command_, gravity_comp) = qp.update(q_,qd_,period);
+    joint_command_ = qp.update(q_,qd_,period);
 
 
     if (control_level == "velocity")
