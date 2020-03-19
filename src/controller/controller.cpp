@@ -55,11 +55,14 @@ bool Controller::Init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eige
     qpoases_solver_->setOptions( options );
     qpoases_solver_->setPrintLevel(qpOASES::PL_NONE); // PL_HIGH for full output, PL_NONE for... none
     
+    //--------------------------------------
+    // INITIALIZE RBOT STATE
+    //--------------------------------------
     q_in.q.data = q_init;
     q_in.qdot.data = qd_init;
     fksolver_->JntToCart(q_in.q,X_curr_);
     
-     //--------------------------------------
+    //--------------------------------------
     // BUILD TRAJECTORY
     //--------------------------------------
     std::string trajectory_file = "/home/lucas/panda_ws/src/auctuspanda/panda_traj/trajectories/go_to_point.csv";
@@ -67,8 +70,6 @@ bool Controller::Init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eige
     trajectory.Load(csv_file_name);
     trajectory.Build(X_curr_, true);
     ROS_DEBUG_STREAM(" Trajectory computed ");
-    ros::param::set("racer_control/Traj_duration", trajectory.Duration());
-    ros::param::set("racer_control/Init_duration", trajectory.ResetDuration());
 
     return true;
 }
@@ -81,9 +82,11 @@ Eigen::VectorXd Controller::update(Eigen::VectorXd q, Eigen::VectorXd qd, const 
     q_in.q.data = q;
     q_in.qdot.data = qd;
 
+    // Update the model
     chainjacsolver_->JntToJac(q_in.q,J_);
     fksolver_->JntToCart(q_in.q,X_curr_);
 
+    //Update the trajectory
     trajectory.updateTrajectory(traj_properties_, time_dt);
     if (traj_properties_.move_)
         traj_properties_.move_ = false;
@@ -94,9 +97,12 @@ Eigen::VectorXd Controller::update(Eigen::VectorXd q, Eigen::VectorXd qd, const 
     tf::twistKDLToEigen(X_err_,x_err);
     xd_des_ = p_gains_.cwiseProduct(x_err);
         
-    //--------------------------------------
-    // QP SOLVER  
-    //--------------------------------------
+
+    // Formulate QP problem such that
+    // qd^{opt} = argmin 1/2 qd^T H_ qd + qd^T g_
+    //              s.t     lbA_ < A_ qd << ubA_
+    //                          lb_ < qd < ub_ 
+
     J = J_.data;
     M = M_.data;
     
@@ -141,17 +147,16 @@ Eigen::VectorXd Controller::update(Eigen::VectorXd q, Eigen::VectorXd qd, const 
     // Zero velocity if no solution found
     joint_velocity_out_.setZero();
 
+    // If successful_return get the primal solution
     if(ret == qpOASES::SUCCESSFUL_RETURN)
         qpoases_solver_->getPrimalSolution(joint_velocity_out_.data());
     else
         ROS_WARN_STREAM("QPOases failed! Sending zero velocity");
     
+    // Publish some messages
     do_publishing();
 
-
     return joint_velocity_out_;
-    // return joint_velocity_out_;
-  
 }
 
 void Controller::BuildTrajectory(KDL::Frame X_curr_)
@@ -229,6 +234,7 @@ bool Controller::load_robot(ros::NodeHandle& node_handle)
     std::string urdf_param;
     node_handle.param("urdf_param", urdf_param, std::string("/robot_description"));
     double eps = 1e-5;
+    // Initialize the KDL Chain
     ik_solver.reset(new TRAC_IK::TRAC_IK(root_link_, tip_link_, urdf_param, timeout, eps));
     bool valid = ik_solver->getKDLChain(chain);
 
@@ -236,6 +242,7 @@ bool Controller::load_robot(ros::NodeHandle& node_handle)
         ROS_ERROR_STREAM("There was no valid KDL chain found");
         return false;
     }
+    // Get the limits from the urdf
     valid = ik_solver->getKDLLimits(ll,ul);
     if (!valid) {
         ROS_ERROR_STREAM("There were no valid KDL joint limits found");
@@ -254,9 +261,10 @@ bool Controller::load_robot(ros::NodeHandle& node_handle)
     for(unsigned int i=0; i<chain.getNrOfSegments(); ++i)
         ROS_INFO_STREAM("    "<<chain.getSegment(i).getName());
 
-    fksolver_.reset(new KDL::ChainFkSolverPos_recursive(chain));
-    fksolvervel_.reset(new KDL::ChainFkSolverVel_recursive(chain));
-    chainjacsolver_.reset(new KDL::ChainJntToJacSolver(chain)); 
+    // Initialize the various solvers 
+    fksolver_.reset(new KDL::ChainFkSolverPos_recursive(chain)); // Forward kinematic solver for geometric purpose
+    fksolvervel_.reset(new KDL::ChainFkSolverVel_recursive(chain));// Forward kinematic solver for kinematic purpose
+    chainjacsolver_.reset(new KDL::ChainJntToJacSolver(chain));  // To get the jacobian
 
     dof = chain.getNrOfJoints();
     number_of_variables = dof;
@@ -274,6 +282,8 @@ void Controller::do_publishing()
     tf::poseKDLToMsg(X_curr_, X_curr_msg_);
     tf::poseKDLToMsg(X_traj_, X_traj_msg_);
     tf::twistKDLToMsg(X_err_, X_err_msg_);
+
+    // Publish custom message define in the msg folder
     if (panda_rundata_publisher.trylock())
     {
         panda_rundata_publisher.msg_.header.stamp = ros::Time::now();
@@ -284,28 +294,30 @@ void Controller::do_publishing()
         panda_rundata_publisher.unlockAndPublish();
     }
 
-  if (pose_curr_publisher.trylock())
-  {
-    tf::poseKDLToMsg(X_curr_, X_curr_msg_);
-    geometry_msgs::PoseStamped X_curr_stamp;
-    pose_curr_publisher.msg_.header.stamp = ros::Time::now();
-    pose_curr_publisher.msg_.header.frame_id = root_link_;
-    pose_curr_publisher.msg_.pose = X_curr_msg_;
-    pose_curr_publisher.unlockAndPublish();
-  }
+    //Publish robot current pose
+    if (pose_curr_publisher.trylock())
+    {
+        tf::poseKDLToMsg(X_curr_, X_curr_msg_);
+        geometry_msgs::PoseStamped X_curr_stamp;
+        pose_curr_publisher.msg_.header.stamp = ros::Time::now();
+        pose_curr_publisher.msg_.header.frame_id = root_link_;
+        pose_curr_publisher.msg_.pose = X_curr_msg_;
+        pose_curr_publisher.unlockAndPublish();
+    }
 
-  if (pose_des_publisher.trylock())
-  {
-    tf::poseKDLToMsg(X_traj_, X_traj_msg_);
-    geometry_msgs::PoseStamped X_des_stamp;
-    pose_des_publisher.msg_.header.stamp = ros::Time::now();
-    pose_des_publisher.msg_.header.frame_id = root_link_;
-    pose_des_publisher.msg_.pose = X_traj_msg_;
-    pose_des_publisher.unlockAndPublish();
-  }
+    //Publish robot desired pose
+    if (pose_des_publisher.trylock())
+    {
+        tf::poseKDLToMsg(X_traj_, X_traj_msg_);
+        geometry_msgs::PoseStamped X_des_stamp;
+        pose_des_publisher.msg_.header.stamp = ros::Time::now();
+        pose_des_publisher.msg_.header.frame_id = root_link_;
+        pose_des_publisher.msg_.pose = X_traj_msg_;
+        pose_des_publisher.unlockAndPublish();
+    }
 }
 
-
+// Ros service to interact with the code
 bool Controller::updateUI(velocity_qp::UI::Request &req, velocity_qp::UI::Response &resp)
 {
     traj_properties_.play_traj_ = req.play_traj;
@@ -324,6 +336,7 @@ bool Controller::updateUI(velocity_qp::UI::Request &req, velocity_qp::UI::Respon
     return true;
 }
 
+// Ros service to update the trajectory
 bool Controller::updateTrajectory(panda_traj::UpdateTrajectory::Request& req, panda_traj::UpdateTrajectory::Response& resp){
 
   trajectory.Load(req.csv_traj_path);
