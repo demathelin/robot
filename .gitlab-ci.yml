@@ -35,7 +35,8 @@ build:release:u180464b:
     - catkin config --init --extend=/home/ci/soft/franka_ros_ws/devel --cmake-args -DFranka_DIR:PATH=/home/ci/soft/libfranka/build
     - source /home/ci/soft/franka_ros_ws/devel/setup.bash
     - catkin build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=--coverage
-    
+  allow_failure: true
+
 build:debug:u180464b:
   stage: build
   tags:
@@ -58,7 +59,8 @@ build:debug:u180464b:
       - ci_ws/src
       - ci_ws/build
       - ci_ws/devel  
-    
+  allow_failure: true   
+
 # analysis
 analysis:coverage:
   stage: test
@@ -94,7 +96,8 @@ analysis:static:
   artifacts:
     paths:
       - analysis
-
+  allow_failure: true
+  
 sonarqube:
   stage: centralize
   dependencies:
@@ -106,7 +109,7 @@ sonarqube:
   script:
     - export PATH=$PATH:/home/ci/soft/sonar-scanner-4.2.0.1873-linux/bin
     - sonar-scanner
-    
+  allow_failure: true    
 # documentation deployment
 pages:
   stage: deploy
