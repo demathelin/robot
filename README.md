@@ -42,11 +42,11 @@ On the real robot
 
 `roslaunch velocity_qp run.launch robot_ip:=your_robot_ip`
 
-Load a new trajectory online (stored in panda_traj/trajectories/name_of_the_trajectory.csv)
+Load a new trajectory online (stored in panda_traj/trajectories/name_of_the_trajectory.csv). This uses a ros service to update the trajectory.
 
 `rosrun velocity_qp load_trajectory.py name_of_the_trajectory`
 
-Play the trajectory (you can also use rqt to call the service)
+Play the trajectory (you can also use rqt to call the service) This uses a ros service to interact with the code.
 
 `rosservice call /velocity_qp/updateUI "play_traj : true"`
 
@@ -66,6 +66,11 @@ Publish the trajectory
 
 The controller parameters are stored in a yaml file in the `/config` folder and loaded as ros parameters in the `run.launch` file. They are then read by the 
 controller with load_parameters(); .
+
+# Custom messages and service
+
+Custom messages can be defined in the `msg` folder. An example is provided with the `PandaRunMsg.msg` file.
+Custom services can be defined in the `srv` folder. An example is provided with the `UI.srv` file.
 
 # Some installation requirement
 
