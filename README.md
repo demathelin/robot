@@ -54,7 +54,7 @@ Publish the trajectory
 
 `rosservice call /velocity_qp/updateUI "publish_traj : true"`
 
-## Optional parameter : 
+## Optional roslaunch parameter : 
 
 `robot_ip` IP adress of the panda robot
 
@@ -62,8 +62,10 @@ Publish the trajectory
 
 `sim` Run the code in simulation on Gazebo
 
-`roslaunch velocity_qp run.launch sim:=true` in simulation mode
+# Controller parameters
 
+The controller parameters are stored in a yaml file in the `/config` folder and loaded as ros parameters in the `run.launch` file. They are then read by the 
+controller with load_parameters(); .
 
 # Some installation requirement
 
