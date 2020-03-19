@@ -71,11 +71,3 @@ controller with load_parameters(); .
 
 Custom messages can be defined in the `msg` folder. An example is provided with the `PandaRunMsg.msg` file.
 Custom services can be defined in the `srv` folder. An example is provided with the `UI.srv` file.
-
-# Some installation requirement
-
-`sudo apt install ros-melodic-track-ik`
-
-`sudo apt install ros-melodic-eigen-conversions`
-
-`sudo apt install ros-melodic-kdl-conversions`
