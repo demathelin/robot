@@ -99,9 +99,9 @@ Eigen::VectorXd Controller::update(Eigen::VectorXd q, Eigen::VectorXd qd, const 
         
 
     // Formulate QP problem such that
-    // qd^{opt} = argmin 1/2 qd^T H_ qd + qd^T g_
-    //              s.t     lbA_ < A_ qd << ubA_
-    //                          lb_ < qd < ub_ 
+    // joint_velocity_out_ = argmin 1/2 qd^T H_ qd + qd^T g_
+    //                         s.t     lbA_ < A_ qd << ubA_
+    //                                     lb_ < qd < ub_ 
 
     J = J_.data;
     M = M_.data;

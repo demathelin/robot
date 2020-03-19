@@ -41,6 +41,7 @@
             args="-param robot_description
                 -urdf
                 -model panda"/>
-
     </group>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find velocity_qp)/launch/robot.rviz"/>
 </launch>

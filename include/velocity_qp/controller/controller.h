@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 <copyright holder> <email>
+ * Copyright 2020 <copyright holder> <email>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,25 +74,25 @@ namespace Controller {
     */
 class Controller{
 public:
-        /**
-        * \fn bool Init
-        * \brief Initializes the controller
-        * \param ros::NodeHandle& node_handle a ros node handle
-        * \param Eigen::VectorXd q_init the robot initial joint position
-        * \param Eigen::VectorXd qd_init the robot initial joint velocity
-        * \return true if the controller is correctly initialized
-        */
-        bool Init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eigen::VectorXd qd_init);
-    
-        /**
-        * \fn std::tuple<Eigen::VectorXd, Eigen::VectorXd> update
-        * \brief Update the controller to get the new desired joint velocity to send to the robot.
-        * \param Eigen::VectorXd q the current joint position of the robot
-        * \param Eigen::VectorXd qd the current joint velocity of the robot
-        * \param const ros::Duration& period the refresh rate of the control
-        * \return A std::tupe with the desired joint velocity and information on the qp solver
-        */
-        Eigen::VectorXd update(Eigen::VectorXd q, Eigen::VectorXd qd, const ros::Duration& period);
+    /**
+    * \fn bool Init
+    * \brief Initializes the controller
+    * \param ros::NodeHandle& node_handle a ros node handle
+    * \param Eigen::VectorXd q_init the robot initial joint position
+    * \param Eigen::VectorXd qd_init the robot initial joint velocity
+    * \return true if the controller is correctly initialized
+    */
+    bool Init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eigen::VectorXd qd_init);
+
+    /**
+    * \fn Eigen::VectorXd update
+    * \brief Update the controller to get the new desired joint velocity to send to the robot.
+    * \param Eigen::VectorXd q the current joint position of the robot
+    * \param Eigen::VectorXd qd the current joint velocity of the robot
+    * \param const ros::Duration& period the refresh rate of the control
+    * \return A Eigen::VectorXd with the desired joint velocity
+    */
+    Eigen::VectorXd update(Eigen::VectorXd q, Eigen::VectorXd qd, const ros::Duration& period);
 
 private:
     
@@ -173,8 +173,14 @@ private:
     */
     void publishTrajectory();
 
+    /**
+    * @brief ros service to interact with the robot
+    */
     bool updateUI(velocity_qp::UI::Request& req, velocity_qp::UI::Response& resp);
 
+    /**
+    * @brief ros service to update the trajectory
+    */
     bool updateTrajectory(panda_traj::UpdateTrajectory::Request &req, panda_traj::UpdateTrajectory::Response &resp);
     
     
@@ -190,8 +196,14 @@ private:
     ros::ServiceServer updateUI_service,
                        updateTraj_service;
     
+    /**
+     * @brief Solver for the inverse kinematic
+    **/
     boost::shared_ptr<TRAC_IK::TRAC_IK> ik_solver;
 
+    /**
+     * @brief solver to compute the Jacobian
+    **/
     boost::scoped_ptr<KDL::ChainJntToJacSolver> chainjacsolver_;
     
     /**
@@ -259,8 +271,8 @@ private:
     int number_of_variables; /*!< @brief Number of optimization variables of the QP problem*/
     
     // Trajectory variables
-    TrajectoryGenerator trajectory;
-    panda_traj::TrajProperties traj_properties_;
+    TrajectoryGenerator trajectory; /*!< @brief TrajectoryGenerator object */
+    panda_traj::TrajProperties traj_properties_; /*!< @brief Properties of the trajectory */
 };
 }
 #endif // CONTROLLER_HPP
