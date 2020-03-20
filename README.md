@@ -31,6 +31,7 @@ A generic low-level joint velocity controller with a QP formulation.
 9. `rosdep install --from-paths src --ignore-src -r -y`
 10. `catkin build`
 11. `source catkin_wd/devel/setup.bash`
+12. Add in your bashrc `export GAZEBO_RESOURCE_PATH=/usr/share/gazebo-9:~/catkin_ws/src/auctuspanda/franka_description/worlds` and `export GAZEBO_MODEL_PATH=~/catkin_ws/src/auctuspanda/franka_description/robots`
 
 # Usage
 
@@ -71,11 +72,3 @@ controller with load_parameters(); .
 
 Custom messages can be defined in the `msg` folder. An example is provided with the `PandaRunMsg.msg` file.
 Custom services can be defined in the `srv` folder. An example is provided with the `UI.srv` file.
-
-# Some installation requirement
-
-`sudo apt install ros-melodic-track-ik`
-
-`sudo apt install ros-melodic-eigen-conversions`
-
-`sudo apt install ros-melodic-kdl-conversions`
