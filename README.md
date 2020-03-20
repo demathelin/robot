@@ -51,6 +51,10 @@ Load a new trajectory online (stored in panda_traj/trajectories/name_of_the_traj
 
 `rosrun velocity_qp load_trajectory.py name_of_the_trajectory`
 
+For example : 
+
+`rosrun velocity_qp load_trajectory.py go_to_point`
+
 Play the trajectory (you can also use rqt to call the service) This uses a ros service to interact with the code.
 
 `rosservice call /velocity_qp/updateUI "play_traj : true"`
