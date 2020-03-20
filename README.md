@@ -26,7 +26,7 @@ A generic low-level joint velocity controller with a QP formulation.
 4. `cd catkin_ws/src`
 5. `git clone git@gitlab.inria.fr:auctus/panda/velocity_qp.git`
 6. `wstool init `
-7. `wstool merge velocity_qp/velocity_qp_dep.rosinstall`
+7. If you have ssh-key setup : `wstool merge velocity_qp/velocity_qp_dep_ssh.rosinstall`. Else `wstool merge velocity_qp/velocity_qp_dep_https.rosinstall`
 8. `wstool update`
 9. `rosdep install --from-paths src --ignore-src -r -y`
 10. `catkin build`

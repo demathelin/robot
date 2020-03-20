@@ -7,3 +7,5 @@
 
 - git: {local-name: franka_description, uri: 'git@gitlab.inria.fr:auctus/panda/franka_description.git'}
 - git: {local-name: franka_control, uri: 'git@gitlab.inria.fr:auctus/panda/franka_control.git'}
+- git: {local-name: panda_traj, uri: 'git@gitlab.inria.fr:auctus/panda/panda_traj.git'}
+- git: {local-name: qpOASES, uri: 'https://github.com/kuka-isir/qpOASES.git'}
