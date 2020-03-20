@@ -26,7 +26,7 @@ A generic low-level joint velocity controller with a QP formulation.
     -   `mkdir -p ~/catkin_ws/src`
     -   `cd ~/catkin_ws`
     -    `catkin config --init --extend /path/to/franka_ros_ws/devel --cmake-args -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=/path/to/libfranka/build -DCMAKE_CXX_FLAGS=-std=c++11`
-4. `cd ~catkin_ws/src`
+4. `cd ~/catkin_ws/src`
 5. If you have ssh-key setup `git clone git@gitlab.inria.fr:auctus/panda/velocity_qp.git`. Else `git clone https://gitlab.inria.fr/auctus/panda/velocity_qp.git`
 6. `wstool init `
 7. If you have ssh-key setup : `wstool merge velocity_qp/velocity_qp_dep_ssh.rosinstall`. Else `wstool merge velocity_qp/velocity_qp_dep_https.rosinstall`
