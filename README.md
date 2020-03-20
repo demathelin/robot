@@ -23,15 +23,19 @@ A generic low-level joint velocity controller with a QP formulation.
 1. `sudo apt install python-wstool`
 2. Follow the installation instruction of the fraka ros package : https://frankaemika.github.io/docs/installation_linux.html#installing-from-the-ros-repositories
 3. (optional) Configure a catkin workspace that extends the previous workspace
-4. `cd catkin_ws/src`
-5. `git clone git@gitlab.inria.fr:auctus/panda/velocity_qp.git`
+    -   `mkdir -p ~/catkin_ws/src`
+    -   `cd ~/catkin_ws`
+    -    `catkin config --init --extend /path/to/franka_ros_ws/devel --cmake-args -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=/path/to/libfranka/build -DCMAKE_CXX_FLAGS=-std=c++11`
+4. `cd ~catkin_ws/src`
+5. If you have ssh-key setup `git clone git@gitlab.inria.fr:auctus/panda/velocity_qp.git`. Else `git clone https://gitlab.inria.fr/auctus/panda/velocity_qp.git`
 6. `wstool init `
 7. If you have ssh-key setup : `wstool merge velocity_qp/velocity_qp_dep_ssh.rosinstall`. Else `wstool merge velocity_qp/velocity_qp_dep_https.rosinstall`
 8. `wstool update`
-9. `rosdep install --from-paths src --ignore-src -r -y`
-10. `catkin build`
-11. `source catkin_wd/devel/setup.bash`
-12. Add in your bashrc `export GAZEBO_RESOURCE_PATH=/usr/share/gazebo-9:~/catkin_ws/src/auctuspanda/franka_description/worlds` and `export GAZEBO_MODEL_PATH=~/catkin_ws/src/auctuspanda/franka_description/robots`
+9. `cd ..`
+10. `rosdep install --from-paths src --ignore-src -r -y`
+11. `catkin build`
+12. `source catkin_ws/devel/setup.bash`
+13. Add in your bashrc `export GAZEBO_RESOURCE_PATH=/usr/share/gazebo-9:~/catkin_ws/src/franka_description/worlds` and `export GAZEBO_MODEL_PATH=~/panda_ws/src/franka_description/robots`
 
 # Usage
 
