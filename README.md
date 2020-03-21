@@ -20,12 +20,27 @@
 A generic low-level joint velocity controller with a QP formulation.
 
 # Installation
-1. `sudo apt install python-wstool`
-2. Follow the installation instruction of the fraka ros package : https://frankaemika.github.io/docs/installation_linux.html#installing-from-the-ros-repositories
-3. (optional) Configure a catkin workspace that extends the previous workspace
+1. `sudo apt install python-rosdep python-catkin-tools ros-melodic-catkin python-wstool python-vcstool`
+2. Follow the installation instruction of the fraka ros package ** from source ** : https://frankaemika.github.io/docs/installation_linux.html#installing-from-the-ros-repositories. ** I advise to create a folder different from `catkin_ws`** .
+
+You can install libfranka from source if you want.
+
+    -   `sudo apt install build-essential cmake git libpoco-dev libeigen3-dev`
+    -   `mkdir -p ~/franka_ros_ws/src`.
+    -   `git clone --recursive https://github.com/frankaemika/franka_ros src/franka_ros`
+    -   `cd franka_ros`
+    -   `git checkout melodic-devel` 
+    -   `cd ~/franka_ros_ws`
+    -   `catkin config --init --extend ~/opt/ros/melodic --cmake-args -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=/path/to/libfranka/build -DCMAKE_CXX_FLAGS=-std=c++11`
+	(If you installed libfranka from source you don't need to specify DFranka_DIR)
+    -   `catkin build`
+    -   `source ~/franka_ros_ws/devel/setup.bash`
+
+3. Configure a catkin workspace that extends the `franka_ros_ws`.
     -   `mkdir -p ~/catkin_ws/src`
     -   `cd ~/catkin_ws`
-    -    `catkin config --init --extend /path/to/franka_ros_ws/devel --cmake-args -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=/path/to/libfranka/build -DCMAKE_CXX_FLAGS=-std=c++11`
+    -   `catkin config --init --extend ~/franka_ros_ws/devel --cmake-args -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=/path/to/libfranka/build -DCMAKE_CXX_FLAGS=-std=c++11`
+	(If you installed libfranka from source you don't need to specify DFranka_DIR)
 4. `cd ~/catkin_ws/src`
 5. If you have ssh-key setup `git clone git@gitlab.inria.fr:auctus/panda/velocity_qp.git`. Else `git clone https://gitlab.inria.fr/auctus/panda/velocity_qp.git`
 6. `wstool init `
@@ -34,8 +49,9 @@ A generic low-level joint velocity controller with a QP formulation.
 9. `cd ..`
 10. `rosdep install --from-paths src --ignore-src -r -y`
 11. `catkin build`
-12. `source catkin_ws/devel/setup.bash`
-13. Add in your bashrc `export GAZEBO_RESOURCE_PATH=/usr/share/gazebo-9:~/catkin_ws/src/franka_description/worlds` and `export GAZEBO_MODEL_PATH=~/panda_ws/src/franka_description/robots`
+12. Add in your bashrc `source catkin_ws/devel/setup.bash`
+13. Add in your bashrc `export GAZEBO_RESOURCE_PATH=/usr/share/gazebo-9:~/catkin_ws/src/franka_description/worlds` and `export GAZEBO_MODEL_PATH=~/catkin_ws/src/franka_description/robots`
+14. If its the first you install gazebo launch it: `gazebo`. Wait for it to launch then close it.
 
 # Usage
 

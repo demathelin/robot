@@ -39,6 +39,7 @@
 #include <controller_interface/multi_interface_controller.h>
 #include <ros/node_handle.h>
 #include <ros/time.h>
+#include <ros/package.h>
 #include <Eigen/Dense>
 
 #include <velocity_qp/UI.h>

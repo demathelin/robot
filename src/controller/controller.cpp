@@ -65,7 +65,8 @@ bool Controller::Init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eige
     //--------------------------------------
     // BUILD TRAJECTORY
     //--------------------------------------
-    std::string trajectory_file = "/home/lucas/panda_ws/src/auctuspanda/panda_traj/trajectories/go_to_point.csv";
+    std::string panda_traj_path = ros::package::getPath("panda_traj");
+    std::string trajectory_file = panda_traj_path+"/trajectories/go_to_point.csv";
     std::string csv_file_name = trajectory_file;
     trajectory.Load(csv_file_name);
     trajectory.Build(X_curr_, true);
