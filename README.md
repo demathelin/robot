@@ -21,15 +21,16 @@ A generic low-level joint velocity controller with a QP formulation.
 
 # Installation
 1. `sudo apt install python-rosdep python-catkin-tools ros-melodic-catkin python-wstool python-vcstool`
-2. Follow the installation instruction of the fraka ros package ** from source ** : https://frankaemika.github.io/docs/installation_linux.html#installing-from-the-ros-repositories. ** I advise to create a folder different from `catkin_ws`** .
-You can install libfranka from source if you want.
+2. Follow the installation instructions of libfranka ** building libfranka ** : https://frankaemika.github.io/docs/installation_linux.html#installing-from-the-ros-repositories. 
+3. Install the franka_ros packages.
     -   `sudo apt install build-essential cmake git libpoco-dev libeigen3-dev`
     -   `mkdir -p ~/franka_ros_ws`.
+    -   `cd ~/franka_ros_ws`
     -   `git clone --recursive https://github.com/frankaemika/franka_ros src/franka_ros`
     -   `cd src/franka_ros`
     -   `git checkout melodic-devel` 
     -   `cd ~/franka_ros_ws`
-    -   `catkin config --init --extend ~/opt/ros/melodic --cmake-args -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=/path/to/libfranka/build -DCMAKE_CXX_FLAGS=-std=c++11`
+    -   `catkin config --init --extend /opt/ros/melodic --cmake-args -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=/path/to/libfranka/build -DCMAKE_CXX_FLAGS=-std=c++11`
 	(If you installed libfranka from source you don't need to specify DFranka_DIR)
     -   `catkin build`
     -   `source ~/franka_ros_ws/devel/setup.bash`
