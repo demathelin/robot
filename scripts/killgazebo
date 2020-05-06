@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 
+# Hack!
+# For some reason, if roscore is not launched before the roslaunch, killgazebo kills the gzserver process
+# created by the new roslaunch torque_qp run.launch sim:=true. 
+# The proposed solution checks if gzserver existed before before when run the roslaunch command.
+
 if pgrep gzserver; # check if gzserver exist
 then 
     pid_gzserver=`pidof gzserver` # get gzserver pid
     gzserver_elapsed_time=`ps -o etimes= -p "$pid_gzserver"` # get gzserver elapsed time since launch
-    if [ $gzserver_elapsed_time -gt 1 ] # if elapsed time greater than 1 second, kill the process 
+    if [ $gzserver_elapsed_time -gt 3 ] # if elapsed time greater than 3 second, kill the process 
     then
         killall gzserver -9 -quiet;
         echo "Killed gzserver $gzserver_elapsed_time";
     fi
 fi
+
 if pgrep gazebo; then killall gazebo; echo "Killed gazebo"; fi
 if pgrep gzclient; then killall gzclient; echo "Killed gzclient"; fi
 exit;
