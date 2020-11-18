@@ -77,22 +77,7 @@ analysis:coverage:
       - ci_ws/devel
       - ci_ws/src      
   allow_failure: true
-  
-analysis:static:
-  stage: test
-  tags:
-    - ci-auctus
-  script:
-    - mkdir analysis
-    - cppcheck --enable=all --suppress=missingIncludeSystem --xml ci_ws/src/velocity_qp &> analysis/cppcheckOutput.xml
-    - rats --xml --warning=3 ci_ws/src > analysis/ratsOutput.xml
-  dependencies:
-    - build:debug
-  artifacts:
-    paths:
-      - analysis
-  allow_failure: true
-  
+
 sonarqube:
   stage: centralize
   dependencies:
@@ -101,7 +86,7 @@ sonarqube:
   tags:
     - ci-auctus
   script:
-    - export PATH=$PATH:/home/ci/soft/sonar-scanner-4.2.0.1873-linux/bin
+    - export PATH=$PATH:/opt/sonar-scanner/bin
     - sonar-scanner
   allow_failure: true    
 # documentation deployment
