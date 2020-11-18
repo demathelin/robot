@@ -30,8 +30,8 @@ build:release:
     - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@gitlab.inria.fr/auctus/panda/franka_description.git
     - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@gitlab.inria.fr/auctus/panda/panda_traj.git
     - cd ..
-    - catkin config --init --extend=/home/ci/soft/franka_ros_ws/devel --cmake-args -DFranka_DIR:PATH=/home/ci/soft/libfranka/build
-    - source /home/ci/soft/franka_ros_ws/devel/setup.bash
+    - catkin config --init --extend=/home/ci/auctus_ws/franka_ros_ws/devel --cmake-args -DFranka_DIR:PATH=/home/ci/auctus_ws/libfranka/build
+    - source /home/ci/auctus_ws/franka_ros_ws/devel/setup.bash
     - catkin build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=--coverage
   allow_failure: true
 
@@ -48,8 +48,8 @@ build:debug:
     - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@gitlab.inria.fr/auctus/panda/franka_description.git
     - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@gitlab.inria.fr/auctus/panda/panda_traj.git
     - cd ..
-    - catkin config --init --extend=/home/ci/soft/franka_ros_ws/devel --cmake-args -DFranka_DIR:PATH=/home/ci/soft/libfranka/build
-    - source /home/ci/soft/franka_ros_ws/devel/setup.bash
+    - catkin config --init --extend=/home/ci/auctus_ws/franka_ros_ws/devel --cmake-args -DFranka_DIR:PATH=/home/ci/auctus_ws/libfranka/build
+    - source /home/ci/auctus_ws/franka_ros_ws/devel/setup.bash
     - catkin build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=--coverage
   artifacts:
     paths:
