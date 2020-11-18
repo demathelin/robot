@@ -82,7 +82,6 @@ sonarqube:
   stage: centralize
   dependencies:
     - analysis:coverage
-    - analysis:static
   tags:
     - ci-auctus
   script:
