@@ -97,7 +97,8 @@ Eigen::VectorXd Controller::update(Eigen::VectorXd q, Eigen::VectorXd qd, const 
     // Proportionnal controller 
     X_err_ = diff( X_curr_ , X_traj_ ); 
     tf::twistKDLToEigen(X_err_,x_err);
-    xd_des_ = p_gains_.cwiseProduct(x_err) + Xd_traj_;
+    tf::twistKDLToEigen(Xd_traj_,xd_traj_);
+    xd_des_ = p_gains_.cwiseProduct(x_err) + xd_traj_;
         
 
     // Formulate QP problem such that

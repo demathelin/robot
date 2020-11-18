@@ -229,7 +229,7 @@ private:
 
     KDL::Frame X_curr_; /*!< @brief KDL current Cartesian pose of the tip_link */
     KDL::Frame X_traj_; /*!< @brief KDL desired Cartesian pose of the tip_link */
-    KDL::Frame Xd_traj_; /*!< @brief KDL desired Cartesian velocity of the tip_link */
+    KDL::Twist Xd_traj_; /*!< @brief KDL desired Cartesian velocity of the tip_link */
 
     KDL::Twist X_err_; /*!< @brief KDL desired Cartesian error between the desired and current pose */
 
@@ -249,7 +249,8 @@ private:
     std::string root_link_; /*!< @brief base link of the KDL chain */
     std::string tip_link_; /*!< @brief tip link of the KDL chain (usually the end effector*/
 
-    Eigen::Matrix<double,6,1> x_err; /*!< @brief desired Cartesian error between the desired and current pose in Eigen */  
+    Eigen::Matrix<double,6,1> x_err; /*!< @brief Cartesian error between the desired and current pose in Eigen */  
+        Eigen::Matrix<double,6,1> xd_traj_; /*!< @brief desired Cartesian velocity in Eigen */  
     Eigen::Matrix <double,6,7> J; /*!< @brief Jacobian in Eigen */  
     Eigen::Matrix <double,7,7> M; /*!< @brief Inertia matrix in joint space in Eigen */  
 
