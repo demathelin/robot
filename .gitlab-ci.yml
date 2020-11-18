@@ -10,18 +10,16 @@ prepare:initialization:
   stage: prepare
   tags:
     - ci-auctus
-    - u180464b
   script:
     - echo ci | sudo -S mv /usr/local/lib/libexpat.so.1 /usr/local/lib/libexpat.so.1.bak && echo $?;echo $?;
   allow_failure: true
   
   
 # builds  
-build:release:u180464b:
+build:release:
   stage: build
   tags:
     - ci-auctus
-    - u180464b
   script:
     - ls -l /usr/local/lib/
     - mkdir -p ci_ws/src/velocity_qp
@@ -37,11 +35,10 @@ build:release:u180464b:
     - catkin build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=--coverage
   allow_failure: true
 
-build:debug:u180464b:
+build:debug:
   stage: build
   tags:
     - ci-auctus
-    - u180464b
   script:
     - mkdir -p ci_ws/src/velocity_qp
     - shopt -s extglob
@@ -66,7 +63,6 @@ analysis:coverage:
   stage: test
   tags:
     - ci-auctus
-    - u180464b
   script:
     - mkdir -p analysis/gcov
     - source ci_ws/devel/setup.bash
@@ -74,7 +70,7 @@ analysis:coverage:
     - timeout 30s roslaunch velocity_qp run.launch sim:=true|| echo exit code $?
     - gcovr --filter="/home/*" --root="$PWD" --xml-pretty --object-directory="$PWD/ci_ws/build" --output="analysis/coverage.xml"
   dependencies:
-    - build:debug:u180464b
+    - build:debug
   artifacts:
     paths:
       - analysis
@@ -86,13 +82,12 @@ analysis:static:
   stage: test
   tags:
     - ci-auctus
-    - u180464b
   script:
     - mkdir analysis
     - cppcheck --enable=all --suppress=missingIncludeSystem --xml ci_ws/src/velocity_qp &> analysis/cppcheckOutput.xml
     - rats --xml --warning=3 ci_ws/src > analysis/ratsOutput.xml
   dependencies:
-    - build:debug:u180464b
+    - build:debug
   artifacts:
     paths:
       - analysis
@@ -105,7 +100,6 @@ sonarqube:
     - analysis:static
   tags:
     - ci-auctus
-    - u180464b
   script:
     - export PATH=$PATH:/home/ci/soft/sonar-scanner-4.2.0.1873-linux/bin
     - sonar-scanner
@@ -115,7 +109,6 @@ pages:
   stage: deploy
   tags:
     - ci-auctus
-    - u180464b
   script:
     - doxygen Doxyfile
     - mv html/ public/
