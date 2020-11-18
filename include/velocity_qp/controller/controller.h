@@ -229,6 +229,7 @@ private:
 
     KDL::Frame X_curr_; /*!< @brief KDL current Cartesian pose of the tip_link */
     KDL::Frame X_traj_; /*!< @brief KDL desired Cartesian pose of the tip_link */
+    KDL::Frame Xd_traj_; /*!< @brief KDL desired Cartesian velocity of the tip_link */
 
     KDL::Twist X_err_; /*!< @brief KDL desired Cartesian error between the desired and current pose */
 

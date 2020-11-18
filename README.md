@@ -19,37 +19,56 @@
 
 A generic low-level joint velocity controller with a QP formulation.
 
-# Installation
-1. `sudo apt install python-rosdep python-catkin-tools ros-melodic-catkin python-wstool python-vcstool`
-2. Follow the installation instructions of libfranka ** building libfranka ** : https://frankaemika.github.io/docs/installation_linux.html#installing-from-the-ros-repositories. 
-3. Install the franka_ros packages.
-    -   `sudo apt install build-essential cmake git libpoco-dev libeigen3-dev`
-    -   `mkdir -p ~/franka_ros_ws`.
-    -   `cd ~/franka_ros_ws`
-    -   `git clone --recursive https://github.com/frankaemika/franka_ros src/franka_ros`
-    -   `cd src/franka_ros`
-    -   `git checkout melodic-devel` 
-    -   `cd ~/franka_ros_ws`
-    -   `catkin config --init --extend /opt/ros/melodic --cmake-args -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=/path/to/libfranka/build -DCMAKE_CXX_FLAGS=-std=c++11`
-	(If you installed libfranka from source you don't need to specify DFranka_DIR)
-    -   `catkin build`
-    -   `source ~/franka_ros_ws/devel/setup.bash`
-3. Configure a catkin workspace that extends the `franka_ros_ws`.
-    -   `mkdir -p ~/catkin_ws/src`
-    -   `cd ~/catkin_ws`
-    -   `catkin config --init --extend ~/franka_ros_ws/devel --cmake-args -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=/path/to/libfranka/build -DCMAKE_CXX_FLAGS=-std=c++11`
-	(If you installed libfranka from source you don't need to specify DFranka_DIR)
-4. `cd ~/catkin_ws/src`
-5. If you have ssh-key setup `git clone git@gitlab.inria.fr:auctus/panda/velocity_qp.git`. Else `git clone https://gitlab.inria.fr/auctus/panda/velocity_qp.git`
-6. `wstool init `
-7. If you have ssh-key setup : `wstool merge velocity_qp/velocity_qp_dep_ssh.rosinstall`. Else `wstool merge velocity_qp/velocity_qp_dep_https.rosinstall`
-8. `wstool update`
-9. `cd ..`
-10. `rosdep install --from-paths src --ignore-src -r -y`
-11. `catkin build`
-12. Add in your bashrc `source ~/catkin_ws/devel/setup.bash`
-13. Add in your bashrc `export GAZEBO_RESOURCE_PATH=/usr/share/gazebo-9:~/catkin_ws/src/franka_description/worlds` and `export GAZEBO_MODEL_PATH=~/catkin_ws/src/franka_description/robots`
-14. If its the first you install gazebo launch it: `gazebo`. Wait for it to launch then close it.
+## Some necessary package to install first:
+
+`sudo apt install python-rosdep python-catkin-tools python-wstool python-vcstool build-essential cmake git libpoco-dev libeigen3-dev ros-melodic-combined-robot-hw`
+
+
+## Install libfranka
+1. `mkdir -p ~/franka_ros_ws`
+2. `git clone --recursive https://github.com/frankaemika/libfranka ~/franka_ros_ws/libfranka`
+3. `cd ~/franka_ros_ws/libfranka`
+4. `git checkout 0.7.1`
+5. `git submodule update`
+6. `mkdir build; cd build`
+7. `cmake -DCMAKE_BUILD_TYPE=Release ..`
+8. `cmake --build .`
+
+
+## Install franka_ros 
+1. `cd ~/franka_ros_ws`
+2. `git clone --recursive https://github.com/frankaemika/franka_ros src/franka_ros`
+3. `cd src/franka_ros`
+4. `git checkout melodic-devel` 
+5. `cd ~/franka_ros_ws`
+6. `catkin config --init --extend /opt/ros/melodic --cmake-args -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-std=c++11 -DFranka_DIR:PATH=~/franka_ros_ws/libfranka/build`
+7. `catkin build`
+8. `source ~/franka_ros_ws/devel/setup.bash`
+
+
+## Install torque_qp
+1. Configure a catkin workspace that extends the `franka_ros_ws`.
+    -   `mkdir -p ~/auctus_ws/src`
+    -   `cd ~/auctus_ws`
+    -   `catkin config --init --extend ~/franka_ros_ws/devel --cmake-args -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=~/franka_ros_ws/libfranka/build -DCMAKE_CXX_FLAGS=-std=c++11`
+2. `cd ~/auctus_ws/src`
+3. `git clone https://gitlab.inria.fr/auctus/panda/torque_qp.git`
+4. `wstool init `
+5. `wstool merge torque_qp/torque_qp.rosinstall`
+6. `wstool update`
+7. `cd ..`
+8. `rosdep install --from-paths src --ignore-src -r -y --skip-keys="libfranka"`
+9. `catkin build`
+
+## Change environment variables
+
+1. Add in your bashrc `source ~/catkin_ws/devel/setup.bash`
+2. Add in your bashrc `export GAZEBO_RESOURCE_PATH=/usr/share/gazebo-9:~/auctus_ws/src/franka_description/worlds` and `export GAZEBO_MODEL_PATH=~/auctus_ws/src/franka_description/robots`
+3. If its the first you install gazebo launch it: `gazebo`. Wait for it to launch then close it.
+
+# Test your installation
+
+To test your installation go to [Usage](https://gitlab.inria.fr/auctus/panda/torque_qp/-/wikis/Usage)
 
 # Usage
 
@@ -67,7 +86,7 @@ Load a new trajectory online (stored in panda_traj/trajectories/name_of_the_traj
 
 For example : 
 
-`rosrun velocity_qp load_trajectory.py go_to_point`
+`rosrun velocity_qp load_trajectory.py back_and_forth`
 
 Play the trajectory (you can also use rqt to call the service) This uses a ros service to interact with the code.
 

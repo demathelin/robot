@@ -92,11 +92,12 @@ Eigen::VectorXd Controller::update(Eigen::VectorXd q, Eigen::VectorXd qd, const 
     if (traj_properties_.move_)
         traj_properties_.move_ = false;
     X_traj_ = trajectory.Pos();
+    Xd_traj_ = trajectory.Vel();
 
     // Proportionnal controller 
     X_err_ = diff( X_curr_ , X_traj_ ); 
     tf::twistKDLToEigen(X_err_,x_err);
-    xd_des_ = p_gains_.cwiseProduct(x_err);
+    xd_des_ = p_gains_.cwiseProduct(x_err) + Xd_traj_;
         
 
     // Formulate QP problem such that
