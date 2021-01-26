@@ -52,9 +52,9 @@ A generic low-level joint velocity controller with a QP formulation.
     -   `cd ~/auctus_ws`
     -   `catkin config --init --extend ~/franka_ros_ws/devel --cmake-args -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=~/franka_ros_ws/libfranka/build -DCMAKE_CXX_FLAGS=-std=c++11`
 2. `cd ~/auctus_ws/src`
-3. `git clone https://gitlab.inria.fr/auctus/panda/torque_qp.git`
+3. `git clone https://gitlab.inria.fr/auctus/panda/velocity_qp.git`
 4. `wstool init `
-5. `wstool merge torque_qp/torque_qp.rosinstall`
+5. `wstool merge velocity_qp/velocity_qp.rosinstall`
 6. `wstool update`
 7. `cd ..`
 8. `rosdep install --from-paths src --ignore-src -r -y --skip-keys="libfranka"`
