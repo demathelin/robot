@@ -18,6 +18,8 @@ A generic low-level joint velocity controller with a QP formulation.
 
 `sudo apt install python-rosdep python-catkin-tools python-wstool python-vcstool build-essential cmake git libpoco-dev libeigen3-dev ros-melodic-combined-robot-hw`
 
+## pinocchio from apt source
+`sudo apt install ros_melodic_pinocchio`
 
 ## Install libfranka
 1. `mkdir -p ~/franka_ros_ws`

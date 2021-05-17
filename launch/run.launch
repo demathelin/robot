@@ -1,10 +1,11 @@
 <?xml version="1.0" ?>
 <launch>
-    <arg name="robot_ip" default="192.16.0.2" />
+    <arg name="robot_ip" default="172.16.0.2" />
     <arg name="load_gripper" default="false" />
     <arg name="sim" default="false" />
     <param name="sim" value="$(arg sim)" />
     <arg name="gazebo_plugin" default="velocity_qp" />
+   
     <rosparam command="load" file="$(find velocity_qp)/config/velocity_qp.yaml" />
 
     <group unless="$(arg sim)">
@@ -13,37 +14,41 @@
             <arg name="load_gripper" value="$(arg load_gripper)" />
         </include>
         <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="velocity_qp"/>
+        <!-- Error recovery at each startup -->
+        <node name="rostopic" pkg="rostopic" type="rostopic" args="pub /franka_control/error_recovery/goal franka_msgs/ErrorRecoveryActionGoal {}"/>
     </group>
     
     <group if="$(arg sim)">
         <remap from="/velocity_qp/joint_states" to="/joint_states" />
-
         <node name="killgazebo" pkg="velocity_qp" type="killgazebo" output="screen" />
-
-        <param name="robot_description" command="$(find xacro)/xacro '$(find franka_description)/robots/panda_arm.urdf.xacro' gazebo_plugin:=$(arg gazebo_plugin)"/>
-
-        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
-
-        <rosparam param="init_joint_positions">
-            panda_joint4: -1.57
-            panda_joint6:  1.57
-        </rosparam>
-
         <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
         <include file="$(find gazebo_ros)/launch/empty_world.launch">
             <!--<arg name="world_name" value="$(find gazebo_tutorials)/worlds/model_push.world"/>-->
             <arg name="paused" value="false"/>
             <arg name="verbose" value="true"/>
-            <arg name="world_name" value="panda_world.world"/>
+            <arg name="world_name" value="$(find franka_description)/worlds/panda_world.world"/>
             <arg name="gui" value="false"/>
             <!-- more default parameters can be changed here -->
         </include>
 
+        <param unless="$(arg load_gripper)" name="robot_description" command="$(find xacro)/xacro '$(find franka_description)/robots/panda_arm.urdf.xacro' gazebo_plugin:=$(arg gazebo_plugin)"/>
+        <group if="$(arg load_gripper)">
+            <param name="robot_description" command="$(find xacro)/xacro '$(find franka_description)/robots/panda_arm_hand.urdf.xacro' gazebo_plugin:=$(arg gazebo_plugin)"/>
+            <node pkg="tf" type="static_transform_publisher" name="panda_leftfinger_connector" args="0 0.04 0.0584 0 0 0 /panda_hand /panda_leftfinger  100"/>
+            <node pkg="tf" type="static_transform_publisher" name="panda_rightfinger_connector" args="0 -0.04 0.0584 0 0 0 /panda_hand /panda_rightfinger  100"/>
+        </group>
+        
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
+        <rosparam param="init_joint_positions">
+            panda_joint4: -1.57
+            panda_joint6:  1.57
+        </rosparam>
+    
         <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" output="screen" 
             args="-param robot_description
-                -urdf
-                -model panda"/>
+                  -urdf
+                  -model panda"/>
+        
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find velocity_qp)/launch/robot.rviz"/>
     </group>
-
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find velocity_qp)/launch/robot.rviz"/>
 </launch>

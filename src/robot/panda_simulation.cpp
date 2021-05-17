@@ -24,23 +24,18 @@ namespace gazebo
         if(!loadWorld())
             return;
         
-        joints_.clear();
-        actuated_joint_names_.clear();
+        joints.clear();
+        actuated_joint_names.clear();
         for(auto joint : model->GetJoints() )
         {
             // Provide feedback to get the internal torque
             joint->SetProvideFeedback(true);
             // Not adding fixed joints
             bool added = false;
-            if( true
-                && joint->LowerLimit(0u) != joint->UpperLimit(0u)
-                && joint->LowerLimit(0u) != 0
-                && !std::isnan(joint->LowerLimit(0u))
-                && !std::isnan(joint->UpperLimit(0u))
-            )
+            if( joint->GetType() != 16448)
             {
-                joints_.push_back(joint);
-                actuated_joint_names_.push_back(joint->GetName());
+                joints.push_back(joint);
+                actuated_joint_names.push_back(joint->GetName());
                 added = true;
             }
 /*
@@ -55,13 +50,13 @@ namespace gazebo
                 */
         }
 
-        if(actuated_joint_names_.size() == 0)
+        if(actuated_joint_names.size() == 0)
         {
             std::cerr << "[GazeboModel \'" << model->GetName() << "\'] " << "Could not get any actuated joint for model " << model->GetName() << '\n';
             return ;
         }
         
-        model_ = model;
+        this->model = model;
 
             std::map<std::string, double> init_joint_positions;
         if(!ros::param::get("/init_joint_positions",init_joint_positions))
@@ -72,17 +67,17 @@ namespace gazebo
         }
         else
         {
-            ndof_ = actuated_joint_names_.size();
-            current_joint_positions_.setZero(ndof_);
+            ndof = actuated_joint_names.size();
+            current_joint_positions.setZero(ndof);
             for(auto e : init_joint_positions)
             {
                 jn.push_back(e.first);
                 jp.push_back(e.second);
-                for(int i=0; i< actuated_joint_names_.size();++i)
+                for(int i=0; i< actuated_joint_names.size();++i)
                 {
-                    if (e.first == actuated_joint_names_.at(i))
+                    if (e.first == actuated_joint_names.at(i))
                     {
-                        current_joint_positions_(i) = e.second;
+                        current_joint_positions(i) = e.second;
                     }
                 }
             }
@@ -90,18 +85,18 @@ namespace gazebo
         }
    
         
-        links_ = model->GetLinks();
-        name_ = model->GetName();
+        links = model->GetLinks();
+        name = model->GetName();
         
         
-        joint_gravity_torques_.setZero(ndof_);
-        current_joint_velocities_.setZero(ndof_);
-        current_joint_external_torques_.setZero(ndof_);
-        joint_torque_command_.setZero(ndof_);
-        current_joint_measured_torques_.setZero(ndof_);
+        joint_gravity_torques.setZero(ndof);
+        current_joint_velocities.setZero(ndof);
+        current_joint_external_torques.setZero(ndof);
+        joint_torque_command.setZero(ndof);
+        current_joint_measured_torques.setZero(ndof);
     
-        current_joint_velocities_ = getJointVelocities();
-        joint_command_.resize(7);        
+        current_joint_velocities = getJointVelocities();
+        joint_command.resize(ndof);        
         ros::NodeHandle node_handle("/velocity_qp");
         
         if (!node_handle.getParam("/velocity_qp/control_level", control_level)) {
@@ -121,15 +116,15 @@ namespace gazebo
         }
         
         
-        joint_states_pub_ = node_handle.advertise<sensor_msgs::JointState>("joint_states", 1, true);
-        joint_states_.name = getActuatedJointNames();
-        joint_states_.position.resize(ndof_);
-        joint_states_.velocity.resize(ndof_);
-        joint_states_.effort.resize(ndof_);
+        joint_statespub = node_handle.advertise<sensor_msgs::JointState>("joint_states", 1, true);
+        joint_states.name = getActuatedJointNames();
+        joint_states.position.resize(ndof);
+        joint_states.velocity.resize(ndof);
+        joint_states.effort.resize(ndof);
 
-        qp.Init(node_handle,current_joint_positions_,current_joint_velocities_);
+        qp.init(node_handle,current_joint_positions,current_joint_velocities);
 
-        elapsed_time_ = ros::Duration(0.0);
+        elapsed_time = ros::Duration(0.0);
         
         ROS_WARN_STREAM("SIMULATED ROBOT");
         return;
@@ -143,55 +138,59 @@ namespace gazebo
             std::cerr << "[GazeboModel::" << getName() << "] " << "Could not load gazebo world" << '\n';
             return false;
         }
-        world_ = world;
+        this->world = world;
         // Listen to the update event. This event is broadcast every
         // simulation iteration.
-        world_begin_ = event::Events::ConnectWorldUpdateBegin(
+        world_begin = event::Events::ConnectWorldUpdateBegin(
         std::bind(&PandaSimulation::worldUpdateBegin, this));
         
-         world_end_ = event::Events::ConnectWorldUpdateEnd(std::bind(&PandaSimulation::worldUpdateEnd,this));
+         world_end = event::Events::ConnectWorldUpdateEnd(std::bind(&PandaSimulation::worldUpdateEnd,this));
         return true;
     }
     
     double getIterations()
     {
-            return world_->Iterations();
+        #if GAZEBO_MAJOR_VERSION > 8
+            return world->Iterations();
+        #else
+            return world->GetIterations();
+        #endif
     }
     
     void print() const
     {
-        if(!model_)
+        if(!model)
         {
             std::cout << "[GazeboModel] Model is not loaded." << '\n';
             return;
         }
 
-        std::cerr << "[GazeboModel::" << model_->GetName() << "]" << '\n';
+        std::cerr << "[GazeboModel::" << model->GetName() << "]" << '\n';
         
-        std::cout << "  Joints (" << joints_.size() << ")" << '\n';
-        for(unsigned int i=0; i < joints_.size() ; ++i)
-            std::cout << "     Joint " << i << ": '" << joints_[i]->GetName() << "'" << '\n';
+        std::cout << "  Joints (" << joints.size() << ")" << '\n';
+        for(unsigned int i=0; i < joints.size() ; ++i)
+            std::cout << "     Joint " << i << ": '" << joints[i]->GetName() << "'" << '\n';
         
-        std::cout << "  Actuated joints (" << actuated_joint_names_.size() << ")" << '\n';
-        for(unsigned int i=0; i < actuated_joint_names_.size() ; i++)
-            std::cout << "     Actuated joint " << i << ": '" << actuated_joint_names_[i] << "'" << '\n';
+        std::cout << "  Actuated joints (" << actuated_joint_names.size() << ")" << '\n';
+        for(unsigned int i=0; i < actuated_joint_names.size() ; i++)
+            std::cout << "     Actuated joint " << i << ": '" << actuated_joint_names[i] << "'" << '\n';
 
-        std::cout << "  Links (" << links_.size() << ")" << '\n';
-        for(unsigned int i=0; i < links_.size() ; i++)
-            std::cout << "      Link " << i << ": '" << links_[i]->GetName() << "'" << '\n';
+        std::cout << "  Links (" << links.size() << ")" << '\n';
+        for(unsigned int i=0; i < links.size() ; i++)
+            std::cout << "      Link " << i << ": '" << links[i]->GetName() << "'" << '\n';
         
         printState();
     }
     
      void printState() const
     {
-        if(!model_)
+        if(!model)
         {
             std::cout << "[GazeboModel] Model is not loaded." << '\n';
             return;
         }
         
-        std::cout << "[GazeboModel \'" << model_->GetName() << "\'] State :" << '\n';
+        std::cout << "[GazeboModel \'" << model->GetName() << "\'] State :" << '\n';
         std::cout << "- Gravity "                   <<  getGravity().transpose()                << '\n';
         std::cout << "- Base velocity\n"            << getBaseVelocity().transpose()           << '\n';
         std::cout << "- Tworld->base\n"             << getWorldToBaseTransform().matrix()      << '\n';
@@ -204,123 +203,126 @@ namespace gazebo
     const Eigen::Vector3d& getGravity() const
     {
         assertModelLoaded();
-        return gravity_vector_;
+        return gravity_vector;
     }
 
     const std::vector<std::string>& getActuatedJointNames() const
     {
         assertModelLoaded();
-        return actuated_joint_names_;
+        return actuated_joint_names;
     }
 
     const Eigen::Matrix<double,6,1>& getBaseVelocity() const
     {
         assertModelLoaded();
-        return current_base_vel_;
+        return current_base_vel;
     }
 
     const Eigen::Affine3d& getWorldToBaseTransform() const
     {
         assertModelLoaded();
-        return current_world_to_base_;
+        return current_world_to_base;
     }
 
     const Eigen::VectorXd& getJointPositions() const
     {
         assertModelLoaded();
-        return current_joint_positions_;
+        return current_joint_positions;
     }
 
     const Eigen::VectorXd& getJointVelocities() const
     {
         assertModelLoaded();
-        return current_joint_velocities_;
+        return current_joint_velocities;
     }
 
     void setJointGravityTorques(const Eigen::VectorXd& gravity_torques)
     {
         assertModelLoaded();
-        if (gravity_torques.size() != joint_gravity_torques_.size())
+        if (gravity_torques.size() != joint_gravity_torques.size())
             throw std::runtime_error("Provided gravity torques do not match the model's dofs");
-        joint_gravity_torques_ = gravity_torques;
+        joint_gravity_torques = gravity_torques;
     }
 
     const Eigen::VectorXd& getJointExternalTorques() const
     {
         assertModelLoaded();
-        return current_joint_external_torques_;
+        return current_joint_external_torques;
     }
 
     const Eigen::VectorXd& getJointMeasuredTorques() const
     {
         assertModelLoaded();
-        return current_joint_measured_torques_;
+        return current_joint_measured_torques;
     }
 
-    void setJointTorqueCommand(const Eigen::VectorXd& joint_torque_command)
+    void setJointTorqueCommand(const Eigen::VectorXd& new_joint_torque_command)
     {
         assertModelLoaded();
-        joint_torque_command_ = joint_torque_command;
+        joint_torque_command = new_joint_torque_command;
     }
     
         const std::string& getName() const
     {
         assertModelLoaded();
-        return name_;
+        return name;
     }
 
     const std::string& getBaseName()
     {
         assertModelLoaded();
-        return base_name_;
+        return base_name;
     }
     
     void setBrakes(bool enable)
     {
-        brakes_ = enable;
+        brakes = enable;
     }
 
     int getNDof() const
     {
         assertModelLoaded();
-        return ndof_;
+        return ndof;
     }
     
     // Called by the world update start event
     public: 
     void worldUpdateBegin()
     {
-        period = ros::Duration(world_->Physics()->GetMaxStepSize());
-        brakes_ = false;
-        model_->SetEnabled(!brakes_); // Enable the robot when brakes are off
+        #if GAZEBO_MAJOR_VERSION > 8
+            period = ros::Duration(world->Physics()->GetMaxStepSize());
+        #else
+            period = ros::Duration(world->GetPhysicsEngine()->GetMaxStepSize());
+        #endif
+        brakes = false;
+        model->SetEnabled(!brakes); // Enable the robot when brakes are off
 
-        joint_states_.header.stamp = ros::Time::now();
-        Eigen::VectorXd::Map(joint_states_.position.data(),joint_states_.position.size()) = getJointPositions();
-        Eigen::VectorXd::Map(joint_states_.velocity.data(),joint_states_.velocity.size()) = getJointVelocities();
-        Eigen::VectorXd::Map(joint_states_.effort.data(),joint_states_.effort.size()) = getJointMeasuredTorques();
+        joint_states.header.stamp = ros::Time::now();
+        Eigen::VectorXd::Map(joint_states.position.data(),joint_states.position.size()) = getJointPositions();
+        Eigen::VectorXd::Map(joint_states.velocity.data(),joint_states.velocity.size()) = getJointVelocities();
+        Eigen::VectorXd::Map(joint_states.effort.data(),joint_states.effort.size()) = getJointMeasuredTorques();
 
 
-        joint_states_pub_.publish(joint_states_);
+        joint_statespub.publish(joint_states);
         
         
-        joint_command_ = qp.update(getJointPositions(),getJointVelocities(),period);
+        joint_command = qp.update(getJointPositions(),getJointVelocities(),period);
 
-        auto g = world_->Gravity();
-        gravity_vector_[0] = g[0];
-        gravity_vector_[1] = g[1];
-        gravity_vector_[2] = g[2];
+        auto g = world->Gravity();
+        gravity_vector[0] = g[0];
+        gravity_vector[1] = g[1];
+        gravity_vector[2] = g[2];
 
         if (control_level == "velocity")
         {
-            for(int i=0 ; i < ndof_ ; ++i)
-                joints_[i]->SetVelocity(0, joint_command_[i]);
+            for(int i=0 ; i < ndof ; ++i)
+                joints[i]->SetVelocity(0, joint_command[i]);
             
         }
         else if (control_level == "torque")
         {
-            for(int i=0 ; i < ndof_ ; ++i)
-                joints_[i]->SetForce(0, joint_command_[i]);
-            
+            for(int i=0 ; i < ndof ; ++i)
+                joints[i]->SetForce(0, joint_command[i]);    
         }
     }
     
@@ -331,23 +333,39 @@ namespace gazebo
     
     void worldUpdateEnd()
     {
-        for(int i=0 ; i < ndof_ ; ++i)
+        for(int i=0 ; i < ndof ; ++i)
         {
-            auto joint = joints_[i];
+            auto joint = joints[i];
         
-            current_joint_positions_[i] = joint->Position(0);
-            current_joint_velocities_[i] = joint->GetVelocity(0);
-            current_joint_external_torques_[i] = joint->GetForce(0); // WARNING: This is the  external estimated force (= force applied to the joint = torque command from user)
+            #if GAZEBO_MAJOR_VERSION > 8
+                current_joint_positions[i] = joint->Position(0);
+            #else
+                current_joint_positions[i] = joint->GetAngle(0).Radian();
+            #endif
+            current_joint_velocities[i] = joint->GetVelocity(0);
+            current_joint_external_torques[i] = joint->GetForce(0); // WARNING: This is the  external estimated force (= force applied to the joint = torque command from user)
 
             auto w = joint->GetForceTorque(0u);
-            auto a = joint->LocalAxis(0u);
-            current_joint_measured_torques_[i] = a.Dot(w.body1Torque);
+            #if GAZEBO_MAJOR_VERSION > 8
+                auto a = joint->LocalAxis(0u);
+            #else
+                auto a = joint->GetLocalAxis(0u);
+            #endif
+            current_joint_measured_torques[i] = a.Dot(w.body1Torque);
         }
 
         if(callback_)
         {
-            double sim_time = world_->SimTime().Double();
-            double dt = world_->Physics()->GetMaxStepSize();
+            #if GAZEBO_MAJOR_VERSION > 8
+                double sim_time = world->SimTime().Double();
+            #else
+                double sim_time = world->GetSimTime().Double();
+            #endif
+            #if GAZEBO_MAJOR_VERSION > 8
+                double dt = world->Physics()->GetMaxStepSize();
+            #else
+                double dt = world->GetPhysicsEngine()->GetMaxStepSize();
+            #endif
             callback_(getIterations(),sim_time,dt);
         }
     }
@@ -370,7 +388,7 @@ namespace gazebo
     for (unsigned int i = 0; i < joint_names.size(); i++)
         joint_position_map[joint_names[i]] = joint_positions[i];
 
-    model_->SetJointPositions(joint_position_map);
+    model->SetJointPositions(joint_position_map);
 
     // resume paused state before this call
     world->SetPaused(is_paused);
@@ -380,48 +398,47 @@ namespace gazebo
         
         // Pointer to the model
         private: physics::ModelPtr model;
-                 physics::WorldPtr world_;
+                 physics::WorldPtr world;
         void assertModelLoaded() const
             {
-                if (!model_)
+                if (!model)
                 {
                     ROS_ERROR_STREAM("Gazebo Model is no Loaded");
                     throw std::runtime_error("[GazeboModel] Model is not loaded");
                 }
             }
     
-        public: Eigen::VectorXd q, qd, joint_command_;
+        public: Eigen::VectorXd q, qd, joint_command;
                 std::vector<std::string> jn;
                 std::vector<double> jp;
                 gazebo::common::Time time;
                 gazebo::common::PID pid;
                 int i;
-                ros::Duration period,elapsed_time_;
-                physics::Joint_V joints_;
-                physics::Link_V links_;
-                std::string name_;
-                int ndof_ = 0;
-                Eigen::VectorXd current_joint_positions_;
-                Eigen::VectorXd current_joint_velocities_;
-                Eigen::VectorXd joint_gravity_torques_;
-                Eigen::VectorXd current_joint_external_torques_;
-                Eigen::VectorXd joint_torque_command_;
-                Eigen::VectorXd current_joint_measured_torques_;
-                gazebo::event::ConnectionPtr world_begin_;
-                gazebo::event::ConnectionPtr world_end_;
-                std::vector<std::string> actuated_joint_names_;
-                physics::ModelPtr model_;
-                Eigen::Vector3d gravity_vector_;
-                Eigen::Matrix<double,6,1> current_base_vel_;
-                Eigen::Affine3d current_world_to_base_;
-                std::string base_name_;
+                ros::Duration period,elapsed_time;
+                physics::Joint_V joints;
+                physics::Link_V links;
+                std::string name;
+                int ndof = 0;
+                Eigen::VectorXd current_joint_positions;
+                Eigen::VectorXd current_joint_velocities;
+                Eigen::VectorXd joint_gravity_torques;
+                Eigen::VectorXd current_joint_external_torques;
+                Eigen::VectorXd joint_torque_command;
+                Eigen::VectorXd current_joint_measured_torques;
+                gazebo::event::ConnectionPtr world_begin;
+                gazebo::event::ConnectionPtr world_end;
+                std::vector<std::string> actuated_joint_names;
+                Eigen::Vector3d gravity_vector;
+                Eigen::Matrix<double,6,1> current_base_vel;
+                Eigen::Affine3d current_world_to_base;
+                std::string base_name;
                 std::function<void(uint32_t,double,double)> callback_;
-                bool brakes_;
+                bool brakes;
                 double old_time ;
                 Controller::Controller qp;
                 std::string control_level;
-                ros::Publisher joint_states_pub_;
-                sensor_msgs::JointState joint_states_;
+                ros::Publisher joint_statespub;
+                sensor_msgs::JointState joint_states;
         // Pointer to the update event connection
         private: event::ConnectionPtr updateConnection;
     };

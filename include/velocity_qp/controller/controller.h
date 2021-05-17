@@ -30,6 +30,14 @@
 
 #pragma once
 
+#include "pinocchio/fwd.hpp"
+#include "pinocchio/parsers/urdf.hpp"
+#include "pinocchio/algorithm/jacobian.hpp"
+#include "pinocchio/algorithm/joint-configuration.hpp"
+#include "pinocchio/algorithm/kinematics.hpp"
+#include "pinocchio/algorithm/frames.hpp"
+#include "pinocchio/multibody/model.hpp"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -45,25 +53,15 @@
 #include <velocity_qp/UI.h>
 #include <velocity_qp/PandaRunMsg.h>
 
+#include <qp_solver/qp_solver.hpp>
 #include <qpOASES.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <trac_ik/trac_ik.hpp>
-#include <kdl/chainiksolverpos_nr_jl.hpp>
-#include <kdl/chainfksolvervel_recursive.hpp>
-#include <kdl/chainfksolverpos_recursive.hpp>
-#include <kdl/chain.hpp>
-#include <kdl/frames_io.hpp>
-#include <kdl/jacobian.hpp>
-#include <kdl/chainjnttojacsolver.hpp>
-#include <kdl/jntspaceinertiamatrix.hpp>
 
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <realtime_tools/realtime_publisher.h>
 
-
-#include <kdl_conversions/kdl_msg.h>
 #include <eigen_conversions/eigen_kdl.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <panda_traj/panda_traj.hpp>
@@ -83,7 +81,7 @@ public:
     * \param Eigen::VectorXd qd_init the robot initial joint velocity
     * \return true if the controller is correctly initialized
     */
-    bool Init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eigen::VectorXd qd_init);
+    bool init(ros::NodeHandle& node_handle, Eigen::VectorXd q_init, Eigen::VectorXd qd_init);
 
     /**
     * \fn Eigen::VectorXd update
@@ -97,43 +95,48 @@ public:
 
 private:
     
-    template<class T>
-    bool getRosParam(const std::string& param_name, T& param_data)
+template <class T>
+  bool getRosParam(const std::string& param_name, T& param_data, bool verbose = false)
+  {
+    if (!ros::param::get(param_name, param_data))
     {
-        if(!ros::param::get(param_name,param_data))
-        {
-            ROS_FATAL_STREAM(" Problem loading parameters " << param_name << ". Check the Yaml config file. Killing ros");
-            ros::shutdown();
-        }
-        else
-            ROS_INFO_STREAM(param_name << " : " << param_data);
-        return true;
-    }
-   
-    bool getRosParam(const std::string& param_name, Eigen::VectorXd& param_data)
-{
-    std::vector<double> std_param;
-    if(!ros::param::get(param_name,std_param))
-    {
-        ROS_FATAL_STREAM(" Problem loading parameters " << param_name << ". Check the Yaml config file. Killing ros");
-        ros::shutdown();
+      ROS_FATAL_STREAM(" Problem loading parameters " << param_name << ". Check the Yaml config file. Killing ros");
+      ros::shutdown();
     }
     else
     {
-        if(std_param.size() == param_data.size())
-        {
-            for(int i = 0; i < param_data.size() ; ++i )
-                param_data(i) = std_param[i];
-            ROS_INFO_STREAM(param_name << " : [" << param_data.transpose() << "]");
-            return true;
-        }
-        else
-        {
-            ROS_FATAL_STREAM("Wrong matrix size for param " << param_name << ". Check the Yaml config file. Killing ros" );
-            ros::shutdown();
-        }
+      if (verbose)
+        ROS_INFO_STREAM(param_name << " : " << param_data);
     }
-}
+    return true;
+  }
+
+  bool getRosParam(const std::string& param_name, Eigen::VectorXd& param_data, bool verbose = false)
+  {
+    std::vector<double> std_param;
+    if (!ros::param::get(param_name, std_param))
+    {
+      ROS_FATAL_STREAM(" Problem loading parameters " << param_name << ". Check the Yaml config file. Killing ros");
+      ros::shutdown();
+    }
+    else
+    {
+      if (std_param.size() == param_data.size())
+      {
+        for (int i = 0; i < param_data.size(); ++i)
+          param_data(i) = std_param[i];
+        if (verbose)
+          ROS_INFO_STREAM(param_name << " : " << param_data.transpose());
+        return true;
+      }
+      else
+      {
+        ROS_FATAL_STREAM("Wrong matrix size for param " << param_name << ". Check the Yaml config file. Killing ros");
+        ros::shutdown();
+      }
+    }
+  }
+  
     /**
     * \fn void init_publishers
     * \brief Initializes publishers
@@ -167,7 +170,7 @@ private:
     * \brief Build the trajectory
     * \param KDL::Frame X_curr_ the current pose of the robot
     */
-    void BuildTrajectory(KDL::Frame X_curr_);
+    void BuildTrajectory(Eigen::Affine3d oMtip);
 
     /**
     * @brief Publish the trajectory
@@ -186,9 +189,9 @@ private:
     
     
     // Publishers
-    geometry_msgs::Pose X_curr_msg_
-                        ,X_traj_msg_;
-    geometry_msgs::Twist X_err_msg_;  
+    geometry_msgs::Pose X_curr_msg
+                        ,X_traj_msg;
+    geometry_msgs::Twist err_msg;  
     realtime_tools::RealtimePublisher<geometry_msgs::PoseArray> pose_array_publisher;
     realtime_tools::RealtimePublisher<nav_msgs::Path> path_publisher;
     realtime_tools::RealtimePublisher<velocity_qp::PandaRunMsg> panda_rundata_publisher;
@@ -197,85 +200,35 @@ private:
     ros::ServiceServer updateUI_service,
                        updateTraj_service;
     
-    /**
-     * @brief Solver for the inverse kinematic
-    **/
-    boost::shared_ptr<TRAC_IK::TRAC_IK> ik_solver;
+    std::shared_ptr<pinocchio::Model> model;
+    std::shared_ptr<pinocchio::Data> data;
+    Eigen::Matrix<double,6,1> err;
 
-    /**
-     * @brief solver to compute the Jacobian
-    **/
-    boost::scoped_ptr<KDL::ChainJntToJacSolver> chainjacsolver_;
-    
-    /**
-    * @brief The forward kinematic solver for position
-    */
-    boost::scoped_ptr<KDL::ChainFkSolverPos_recursive> fksolver_;
-
-    /**
-    * @brief The forward kinematic solver for velocity
-    */
-    boost::scoped_ptr<KDL::ChainFkSolverVel_recursive> fksolvervel_;
-
-    
-    
-    KDL::Chain chain; /*!< @brief KDL chain corresponding to the robot */  
-    KDL::JntArray ll; /*!< @brief Joint lower limits vector*/  
-    KDL::JntArray ul; /*!< @brief Joint upper limits vector*/   
-
-    KDL::Jacobian J_; /*!< @brief KDL gravity vector  */
-
-    KDL::JntSpaceInertiaMatrix M_;  /*!< @brief KDL inertia matrix in joint space */
-
-    KDL::Frame X_curr_; /*!< @brief KDL current Cartesian pose of the tip_link */
-    KDL::Frame X_traj_; /*!< @brief KDL desired Cartesian pose of the tip_link */
-    KDL::Twist Xd_traj_; /*!< @brief KDL desired Cartesian velocity of the tip_link */
-
-    KDL::Twist X_err_; /*!< @brief KDL desired Cartesian error between the desired and current pose */
+    pinocchio::Data::Matrix6x J;
 
     KDL::JntArrayVel q_in; /*!< @brief KDL joint position of the robot */
-    Eigen::VectorXd p_gains_; /*!< @brief Proportional gains of the PID controller */ 
-    Eigen::VectorXd i_gains_; /*!< @brief Derivative gains of the PID controller */
-    Eigen::VectorXd d_gains_; /*!< @brief Integral gains of the PID controller */
-    Eigen::VectorXd p_gains_qd_; /*!< @brief Proportional gains of the regularisation controller */
-    Eigen::VectorXd joint_velocity_out_; /*!< @brief Results of the QP optimization */
+    Eigen::VectorXd p_gains; /*!< @brief Proportional gains of the PID controller */ 
+    Eigen::VectorXd p_gains_qd; /*!< @brief Proportional gains of the regularisation controller */
+    Eigen::VectorXd joint_velocity_out; /*!< @brief Results of the QP optimization */
 
-    Eigen::Matrix<double,6,1> xd_des_; /*!< @brief Desired robot twist of the robot tip_link */
-    Eigen::Matrix<double,6,1> x_curr_; /*!< @brief Current robot pose of the robot tip_link */
+    Eigen::Matrix<double,6,1> xd_des; /*!< @brief Desired robot twist of the robot tip_link */
 
-    double regularisation_weight_; /*!< @brief Regularisation weight */
-    int dof; /*!< @brief Number of degrees of freedom of the robot */
+    double regularisation_weight; /*!< @brief Regularisation weight */
 
-    std::string root_link_; /*!< @brief base link of the KDL chain */
-    std::string tip_link_; /*!< @brief tip link of the KDL chain (usually the end effector*/
+    std::string tip_link; /*!< @brief tip link of the KDL chain (usually the end effector*/
+    Eigen::Affine3d oMtip; 
 
-    Eigen::Matrix<double,6,1> x_err; /*!< @brief Cartesian error between the desired and current pose in Eigen */  
-        Eigen::Matrix<double,6,1> xd_traj_; /*!< @brief desired Cartesian velocity in Eigen */  
-    Eigen::Matrix <double,6,7> J; /*!< @brief Jacobian in Eigen */  
-    Eigen::Matrix <double,7,7> M; /*!< @brief Inertia matrix in joint space in Eigen */  
+    Eigen::VectorXd q_mean; /*!< @brief Mean joint position of the robot (for the regularization task*/
 
-    // Matrices for qpOASES
-    // NOTE: We need RowMajor (see qpoases doc)
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> H_; /*!< @brief Hessian matrix of the QP*/
-    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> A_; /*!< @brief Constraint matrix of the QP */
+    QPSolver qp_solver;
+    QPSolver::qpProblem qp;
 
-    Eigen::VectorXd g_; /*!< @brief Gradient vector of the QP */
-    Eigen::VectorXd lb_; /*!< @brief Lower bound vector of the QP */
-    Eigen::VectorXd ub_; /*!< @brief Upper bound vector of the QP */
-    Eigen::VectorXd lbA_; /*!< @brief Constraint lower bound vector of the QP */
-    Eigen::VectorXd ubA_; /*!< @brief Constraint upper bound vector of the QP */
-    Eigen::VectorXd qd_min_; /*!< @brief Minimum joint velocity limit vector*/
-    Eigen::VectorXd qd_max_; /*!< @brief Maximum joint velocity limit vector*/
-    Eigen::VectorXd qdd_max_; /*!< @brief Maximum joint acceleration limit vector*/
-    Eigen::VectorXd q_mean_; /*!< @brief Mean joint position of the robot (for the regularization task*/
-
-    std::unique_ptr<qpOASES::SQProblem> qpoases_solver_; /*!< @brief QP solver point*/
-    int number_of_constraints_; /*!< @brief Number of constraints of the QP problem*/
+    int number_of_constraints; /*!< @brief Number of constraints of the QP problem*/
     int number_of_variables; /*!< @brief Number of optimization variables of the QP problem*/
     
     // Trajectory variables
     TrajectoryGenerator trajectory; /*!< @brief TrajectoryGenerator object */
-    panda_traj::TrajProperties traj_properties_; /*!< @brief Properties of the trajectory */
+    panda_traj::TrajProperties traj_properties; /*!< @brief Properties of the trajectory */
 };
 }
 #endif // CONTROLLER_HPP

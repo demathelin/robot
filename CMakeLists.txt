@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(velocity_qp)
+cmake_minimum_required(VERSION 3.5)
+project(velocity_qp VERSION 0.0.1 LANGUAGES CXX )
 
 
 set(CMAKE_BUILD_TYPE Release)
@@ -7,31 +7,27 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(Franka 0.5.0 REQUIRED)
+find_package(gazebo REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(Boost REQUIRED COMPONENTS date_time)
+find_package(pinocchio REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
   panda_traj
+  qp_solver
   controller_interface
   geometry_msgs
   realtime_tools
   franka_hw
   franka_control
-  franka_gripper
   hardware_interface
-  pluginlib
   roscpp
   rospy  
-  trac_ik_lib
-  qpOASES
-  kdl_conversions
+  message_generation
   eigen_conversions
   std_msgs
 )
-
-find_package(Franka 0.5.0 REQUIRED)
-find_package(gazebo REQUIRED)
-find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED COMPONENTS date_time)
-find_package(orocos_kdl REQUIRED)
 
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS} ${GAZEBO_INCLUDE_DIRS})
@@ -64,15 +60,14 @@ add_library(${PROJECT_NAME}
 add_dependencies(${PROJECT_NAME}
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
-  ${PROJECT_NAME}_gencfg
 )
 
 target_link_libraries(${PROJECT_NAME}
-  ${Franka_LIBRARIES}
+  pinocchio::pinocchio
   ${catkin_LIBRARIES}
+  ${Franka_LIBRARIES}
   ${GAZEBO_LIBRARIES}
   ${Boost_LIBRARIES}  
-  ${orocos_kdl_LIBRARIES}
 )
 
 
@@ -98,7 +93,6 @@ catkin_package(
     controller_interface
     franka_hw
     franka_control
-    franka_gripper
     hardware_interface
     message_runtime
     pluginlib
