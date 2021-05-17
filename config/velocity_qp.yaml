@@ -9,17 +9,12 @@ velocity_qp:
         - panda_joint5
         - panda_joint6
         - panda_joint7
+
     control_level : velocity
-    p_gains_: [10, 10, 10, 10, 10, 10] 
-    d_gains_: [0.0 ,0.0, 0.0, 0.0, 0.0, 0.0] 
-    p_gains_qd_: [5, 5, 5, 5, 5, 5, 5] 
-    root_link_ : "panda_link0"
-    tip_link_ : "panda_FT"
-    q_mean_ : [0.01 , 0.0, 0.01, -1.501, 0.0, 1.5, 0.0] 
-    qd_min_ : [-2.0 , -2.0 , -2.0 , -2.0 , -2.0 , -2.0 , -2.0]
-    qd_max_ : [2.0 , 2.0 , 2.0 , 2.0 , 2.0 , 2.0 , 2.0]
-    qdd_max_ : [15 , 7.5 , 10 , 12.5 , 15 , 20 , 20]
-    torque_max_ : [87.0 , 87.0 , 87.0 , 87.0 , 12.0 , 12.0 , 12.0]
-    
-    regularisation_weight_ : 1.0e-5
+    tip_link : "panda_link8"
+    p_gains: [10, 10, 10, 10, 10, 10] 
+    p_gains_qd: [5, 5, 5, 5, 5, 5, 5] 
+    q_mean : [0.01 , 0.0, 0.01, -1.501, 0.0, 1.5, 0.0] 
+    qdd_max : [15 , 7.5 , 10 , 12.5 , 15 , 20 , 20]
+    regularisation_weight : 1.0e-5
   

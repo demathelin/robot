@@ -1,106 +1,117 @@
 stages:
   - prepare
   - build
-  - test
+  - analysis
   - centralize
   - deploy
 
-# prepare
-prepare:initialization:
-  stage: prepare
-  tags:
-    - ci-auctus
-  script:
-    - echo ci | sudo -S mv /usr/local/lib/libexpat.so.1 /usr/local/lib/libexpat.so.1.bak && echo $?;echo $?;
-  allow_failure: true
-  
-  
 # builds  
-build:release:
+build:kinetic:
   stage: build
   tags:
-    - ci-auctus
+    - docker
+  image: my-kinetic
   script:
-    - ls -l /usr/local/lib/
-    - mkdir -p ci_ws/src/velocity_qp
-    - shopt -s extglob
-    - mv !(ci_ws) ci_ws/src/velocity_qp
-    - cd ci_ws/src/
-    - git clone https://github.com/kuka-isir/qpOASES.git
-    - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@gitlab.inria.fr/auctus/panda/franka_description.git
-    - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@gitlab.inria.fr/auctus/panda/panda_traj.git
-    - cd ..
-    - catkin config --init --extend=/home/ci/auctus_ws/franka_ros_ws/devel --cmake-args -DFranka_DIR:PATH=/home/ci/auctus_ws/libfranka/build
-    - source /home/ci/auctus_ws/franka_ros_ws/devel/setup.bash
+    - source ~/auctus_ws/franka_ros_ws/devel/setup.bash
+    - rm -rf ~/auctus_ws/ci/*
+    - mkdir -p ~/auctus_ws/ci/src/velocity_qp
+    - mv * ~/auctus_ws/ci/src/velocity_qp 
+    - cd ~/auctus_ws/ci/src
+    - wstool init
+    - wstool merge velocity_qp/velocity_qp.rosinstall
+    - wstool update
+    - cd panda_traj
+    - git checkout feature_pinocchio
+    - rosdep install --from-paths ../../src --ignore-src -r -y
+    - cd ~/auctus_ws/ci/
+    - catkin config --init  
+    - catkin build -DCMAKE_BUILD_TYPE=Release 
+
+build:melodic:
+  stage: build
+  tags:
+    - docker
+  image: my-melodic
+  script:
+    - source ~/auctus_ws/franka_ros_ws/devel/setup.bash
+    - rm -rf ~/auctus_ws/ci/*
+    - mkdir -p ~/auctus_ws/ci/src/velocity_qp
+    - mv * ~/auctus_ws/ci/src/velocity_qp 
+    - cd ~/auctus_ws/ci/src
+    - wstool init
+    - wstool merge velocity_qp/velocity_qp.rosinstall
+    - wstool update
+    - cd panda_traj
+    - git checkout feature_pinocchio
+    - rosdep install --from-paths ../../src --ignore-src -r -y
+    - cd ~/auctus_ws/ci/
+    - catkin config --init  
+    - catkin build -DCMAKE_BUILD_TYPE=Release 
+
+build:noetic:
+  stage: build
+  tags:
+    - docker
+  image: my-noetic
+  script:
+    - source ~/auctus_ws/franka_ros_ws/devel/setup.bash
+    - rm -rf ~/auctus_ws/ci/*
+    - mkdir -p ~/auctus_ws/ci/src/velocity_qp
+    - cp -r * ~/auctus_ws/ci/src/velocity_qp 
+    - cd ~/auctus_ws/ci/src
+    - wstool init
+    - wstool merge velocity_qp/velocity_qp.rosinstall
+    - wstool update
+    - cd panda_traj
+    - git checkout feature_pinocchio
+    - rosdep install --from-paths ../../src --ignore-src -r -y
+    - cd ~/auctus_ws/ci/
+    - catkin config --init  
     - catkin build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=--coverage
-  allow_failure: true
 
-build:debug:
-  stage: build
-  tags:
-    - ci-auctus
-  script:
-    - mkdir -p ci_ws/src/velocity_qp
-    - shopt -s extglob
-    - mv !(ci_ws) ci_ws/src/velocity_qp
-    - cd ci_ws/src/
-    - git clone https://github.com/kuka-isir/qpOASES.git
-    - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@gitlab.inria.fr/auctus/panda/franka_description.git
-    - git clone https://oauth2:77xWF9zQnWsm6b_c1qUy@gitlab.inria.fr/auctus/panda/panda_traj.git
-    - cd ..
-    - catkin config --init --extend=/home/ci/auctus_ws/franka_ros_ws/devel --cmake-args -DFranka_DIR:PATH=/home/ci/auctus_ws/libfranka/build
-    - source /home/ci/auctus_ws/franka_ros_ws/devel/setup.bash
-    - catkin build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=--coverage
-  artifacts:
-    paths:
-      - ci_ws/src
-      - ci_ws/build
-      - ci_ws/devel  
-  allow_failure: true   
-
-# analysis
+#analysis
 analysis:coverage:
-  stage: test
+  stage: analysis
+  image: my-noetic
   tags:
-    - ci-auctus
+    - docker
   script:
-    - mkdir -p analysis/gcov
-    - source ci_ws/devel/setup.bash
-    - export GAZEBO_RESOURCE_PATH=ci_ws/src/franka_description/worlds/
+    - mkdir -p /root/auctus_ws/ci/analysis
+    - source /root/auctus_ws/ci/devel/setup.bash
     - timeout 30s roslaunch velocity_qp run.launch sim:=true|| echo exit code $?
-    - gcovr --filter="/home/*" --root="$PWD" --xml-pretty --object-directory="$PWD/ci_ws/build" --output="analysis/coverage.xml"
-  dependencies:
-    - build:debug
-  artifacts:
-    paths:
-      - analysis
-      - ci_ws/devel
-      - ci_ws/src      
-  allow_failure: true
+    - gcovr --xml-pretty --root="/root/auctus_ws/ci/" --output="/root/auctus_ws/ci/analysis/coverage.xml"
+
+analysis:static:
+  stage: analysis
+  image: my-noetic
+  tags:
+    - docker
+  script:
+    - mkdir analysis
+    - cppcheck --enable=all --suppress=missingIncludeSystem --xml /root/auctus_ws/ci/src/velocity_qp &> /root/auctus_ws/ci/analysis/cppcheckOutput.xml
+
 
 sonarqube:
   stage: centralize
-  dependencies:
-    - analysis:coverage
+  image: my-noetic
   tags:
-    - ci-auctus
+    - docker
   script:
     - export PATH=$PATH:/opt/sonar-scanner/bin
     - sonar-scanner
-  allow_failure: true    
+  dependencies:
+    - analysis:coverage
+    - analysis:static
+    
 # documentation deployment
 pages:
   stage: deploy
   tags:
-    - ci-auctus
+    - docker
+  image: my-noetic
   script:
     - doxygen Doxyfile
     - mv html/ public/
   artifacts:
     paths:
       - public
-  dependencies:
-    - sonarqube
-  only:
-    - master
-

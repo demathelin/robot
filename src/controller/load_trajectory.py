@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import rospy
@@ -17,8 +17,8 @@ def UpdateMyTrajectory(x, y):
         req.csv_traj_path = x
         req.verbose = y
         client.call(req);
-    except rospy.ServiceException, e:
-        print "Service call failed: %s"%e
+    except rospy.ServiceException as e:
+        print ("Service call failed: ",e)
 
 def usage():
     return "%s [traj_path verbose = (default false)]"%sys.argv[0]
@@ -31,8 +31,8 @@ if __name__ == "__main__":
         traj_path_ = rospack.get_path('panda_traj') + "/trajectories/" + str(sys.argv[1])+".csv"
         verbose_ = bool(sys.argv[1])
     else:
-        print usage()
+        print(usage())
         sys.exit(1)
     
-    print "Requesting %s"%(traj_path_)
+    print ("Requesting ",traj_path_)
     UpdateMyTrajectory(traj_path_, verbose_ )
