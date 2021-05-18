@@ -20,9 +20,7 @@ build:kinetic:
     - wstool init
     - wstool merge velocity_qp/velocity_qp.rosinstall
     - wstool update
-    - cd panda_traj
-    - git checkout feature_pinocchio
-    - rosdep install --from-paths ../../src --ignore-src -r -y
+    - rosdep install --from-paths ../src --ignore-src -r -y
     - cd ~/auctus_ws/ci/
     - catkin config --init  
     - catkin build -DCMAKE_BUILD_TYPE=Release 
@@ -41,9 +39,7 @@ build:melodic:
     - wstool init
     - wstool merge velocity_qp/velocity_qp.rosinstall
     - wstool update
-    - cd panda_traj
-    - git checkout feature_pinocchio
-    - rosdep install --from-paths ../../src --ignore-src -r -y
+    - rosdep install --from-paths ../src --ignore-src -r -y
     - cd ~/auctus_ws/ci/
     - catkin config --init  
     - catkin build -DCMAKE_BUILD_TYPE=Release 
@@ -62,9 +58,7 @@ build:noetic:
     - wstool init
     - wstool merge velocity_qp/velocity_qp.rosinstall
     - wstool update
-    - cd panda_traj
-    - git checkout feature_pinocchio
-    - rosdep install --from-paths ../../src --ignore-src -r -y
+    - rosdep install --from-paths ../src --ignore-src -r -y
     - cd ~/auctus_ws/ci/
     - catkin config --init  
     - catkin build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=--coverage
