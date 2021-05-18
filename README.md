@@ -2,8 +2,6 @@
 [![Quality Gate Status](https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=auctus%3Apanda%3Avelocity-qp&metric=alert_status)](https://sonarqube.inria.fr/sonarqube/dashboard?id=auctus%3Apanda%3Atorque-qp)
 [![Coverage](https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=auctus%3Apanda%3Avelocity-qp&metric=coverage)](https://sonarqube.inria.fr/sonarqube/dashboard?id=auctus%3Apanda%3Avelocity-qp)
 
-[![Bugs](https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=auctus%3Apanda%3Avelocity-qp&metric=bugs)](https://sonarqube.inria.fr/sonarqube/dashboard?id=auctus%3Apanda%3Avelocity-qp)
-
 # Links
 - Sonarqube : https://sonarqube.inria.fr/sonarqube/dashboard?id=auctus%3Apanda%3Avelocity-qp
 - Documentation : https://auctus.gitlabpages.inria.fr/panda/velocity_qp/index.html
