@@ -10,7 +10,7 @@
 
 # Velocity QP
 
-A generic low-level joint velocity controller with a QP formulation.
+A generic low-level joint velocity controller with a QP formulation.  
 _Remark:_ I use ROS-Melodic and GAZEBO version 9.19.0 for Ubuntu 18.04.5 LTS.
 ## Some necessary package to install first:
 
