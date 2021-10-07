@@ -6,7 +6,7 @@ set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+ENABLE_LANGUAGE(C)
 find_package(Franka 0.5.0 REQUIRED)
 find_package(gazebo REQUIRED)
 find_package(Eigen3 REQUIRED)

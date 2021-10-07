@@ -39,7 +39,9 @@ A generic low-level joint velocity controller with a QP formulation.
 5. `wstool merge velocity_qp/velocity_qp.rosinstall`
 6. `wstool update`
 8. `rosdep install --from-paths ../src --ignore-src -r -y`
-9. `catkin build`
+9. **New step**: Add `ENABLE_LANGUAGE{C}` in the file `velocity_qp\CMakeLists.txt` at the 9th line
+10. **New step**: `cd ~/auctus_ws/dev_ros_ws/src`
+11. `catkin build`
 
 
 ## Change environment variables
@@ -54,6 +56,8 @@ In simulation
 
 `roslaunch velocity_qp run.launch sim:=true`
 
+![ALT](/image/step1.png)
+
 On the real robot
 
 `roslaunch velocity_qp run.launch robot_ip:=your_robot_ip`
@@ -64,15 +68,20 @@ Load a new trajectory online (stored in panda_traj/trajectories/name_of_the_traj
 
 For example : 
 
-`rosrun velocity_qp load_trajectory.py back_and_forth`
+`rosrun velocity_qp load_trajectory.py box`
+
+![ALT](/image/step2.png)
 
 Play the trajectory (you can also use rqt to call the service) This uses a ros service to interact with the code.
 
 `rosservice call /velocity_qp/updateUI "play_traj : true"`
 
+![ALT](/image/step3.png)
+
 Publish the trajectory 
 
 `rosservice call /velocity_qp/updateUI "publish_traj : true"`
+
 
 ## Optional roslaunch parameter : 
 
