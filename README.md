@@ -85,7 +85,7 @@ Publish the trajectory
 
 ## Video
 
-A record is available in movie/arc.ogv
+A record of the robot moving the trajectory of type arc is available in movie/arc.ogv
 ## Optional roslaunch parameter : 
 
 `robot_ip` IP adress of the panda robot
