@@ -1,0 +1,20 @@
+velocity_qp:
+    type: velocity_qp/PandaController
+    arm_id: panda
+    joint_names:
+        - panda_joint1
+        - panda_joint2
+        - panda_joint3
+        - panda_joint4
+        - panda_joint5
+        - panda_joint6
+        - panda_joint7
+
+    control_level : velocity
+    tip_link : "panda_link8"
+    p_gains: [10, 10, 10, 10, 10, 10] 
+    p_gains_qd: [5, 5, 5, 5, 5, 5, 5] 
+    q_mean : [0.01 , 0.0, 0.01, -1.501, 0.0, 1.5, 0.0] 
+    qdd_max : [15 , 7.5 , 10 , 12.5 , 15 , 20 , 20]
+    regularisation_weight : 1.0e-5
+  

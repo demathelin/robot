@@ -1,0 +1,11 @@
+# IT IS UNLIKELY YOU WANT TO EDIT THIS FILE BY HAND,
+# UNLESS FOR REMOVING ENTRIES.
+# IF YOU WANT TO CHANGE THE ROS ENVIRONMENT VARIABLES
+# USE THE rosinstall TOOL INSTEAD.
+# IF YOU CHANGE IT, USE rosinstall FOR THE CHANGES TO TAKE EFFECT
+
+
+- git: {local-name: franka_description, uri: 'https://gitlab.inria.fr/auctus/panda/franka_description.git'}
+- git: {local-name: panda_traj, uri: 'https://gitlab.inria.fr/auctus/panda/panda_traj.git'}
+- git: {local-name: qp_solver, uri: 'https://gitlab.inria.fr/auctus/panda/qp_solver.git'}
+- git: {local-name: qpOASES, uri: 'https://github.com/kuka-isir/qpOASES.git'}

@@ -1,0 +1,111 @@
+stages:
+  - prepare
+  - build
+  - analysis
+  - centralize
+  - deploy
+
+# builds  
+build:kinetic:
+  stage: build
+  tags:
+    - docker
+  image: my-kinetic
+  script:
+    - source ~/auctus_ws/franka_ros_ws/devel/setup.bash
+    - rm -rf ~/auctus_ws/ci/*
+    - mkdir -p ~/auctus_ws/ci/src/velocity_qp
+    - mv * ~/auctus_ws/ci/src/velocity_qp 
+    - cd ~/auctus_ws/ci/src
+    - wstool init
+    - wstool merge velocity_qp/velocity_qp.rosinstall
+    - wstool update
+    - rosdep install --from-paths ../src --ignore-src -r -y
+    - cd ~/auctus_ws/ci/
+    - catkin config --init  
+    - catkin build -DCMAKE_BUILD_TYPE=Release 
+
+build:melodic:
+  stage: build
+  tags:
+    - docker
+  image: my-melodic
+  script:
+    - source ~/auctus_ws/franka_ros_ws/devel/setup.bash
+    - rm -rf ~/auctus_ws/ci/*
+    - mkdir -p ~/auctus_ws/ci/src/velocity_qp
+    - mv * ~/auctus_ws/ci/src/velocity_qp 
+    - cd ~/auctus_ws/ci/src
+    - wstool init
+    - wstool merge velocity_qp/velocity_qp.rosinstall
+    - wstool update
+    - rosdep install --from-paths ../src --ignore-src -r -y
+    - cd ~/auctus_ws/ci/
+    - catkin config --init  
+    - catkin build -DCMAKE_BUILD_TYPE=Release 
+
+build:noetic:
+  stage: build
+  tags:
+    - docker
+  image: my-noetic
+  script:
+    - source ~/auctus_ws/franka_ros_ws/devel/setup.bash
+    - rm -rf ~/auctus_ws/ci/*
+    - mkdir -p ~/auctus_ws/ci/src/velocity_qp
+    - cp -r * ~/auctus_ws/ci/src/velocity_qp 
+    - cd ~/auctus_ws/ci/src
+    - wstool init
+    - wstool merge velocity_qp/velocity_qp.rosinstall
+    - wstool update
+    - rosdep install --from-paths ../src --ignore-src -r -y
+    - cd ~/auctus_ws/ci/
+    - catkin config --init  
+    - catkin build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=--coverage
+
+#analysis
+analysis:coverage:
+  stage: analysis
+  image: my-noetic
+  tags:
+    - docker
+  script:
+    - mkdir -p /root/auctus_ws/ci/analysis
+    - source /root/auctus_ws/ci/devel/setup.bash
+    - timeout 30s roslaunch velocity_qp run.launch sim:=true|| echo exit code $?
+    - gcovr --xml-pretty --root="/root/auctus_ws/ci/" --output="/root/auctus_ws/ci/analysis/coverage.xml"
+
+analysis:static:
+  stage: analysis
+  image: my-noetic
+  tags:
+    - docker
+  script:
+    - mkdir analysis
+    - cppcheck --enable=all --suppress=missingIncludeSystem --xml /root/auctus_ws/ci/src/velocity_qp &> /root/auctus_ws/ci/analysis/cppcheckOutput.xml
+
+
+sonarqube:
+  stage: centralize
+  image: my-noetic
+  tags:
+    - docker
+  script:
+    - export PATH=$PATH:/opt/sonar-scanner/bin
+    - sonar-scanner
+  dependencies:
+    - analysis:coverage
+    - analysis:static
+    
+# documentation deployment
+pages:
+  stage: deploy
+  tags:
+    - docker
+  image: my-noetic
+  script:
+    - doxygen Doxyfile
+    - mv html/ public/
+  artifacts:
+    paths:
+      - public

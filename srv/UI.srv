@@ -1,0 +1,6 @@
+bool play_traj
+bool publish_traj 
+bool build_traj
+bool exit_
+---
+bool result
