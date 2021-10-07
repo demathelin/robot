@@ -11,7 +11,7 @@
 # Velocity QP
 
 A generic low-level joint velocity controller with a QP formulation.
-
+_Remark:_ I use ROS-Melodic and GAZEBO version 9.19.0 for Ubuntu 18.04.5 LTS.
 ## Some necessary package to install first:
 
 `sudo apt install python-rosdep python-catkin-tools python-wstool python-vcstool build-essential cmake git libpoco-dev libeigen3-dev`
@@ -43,6 +43,7 @@ A generic low-level joint velocity controller with a QP formulation.
 10. **New step**: `cd ~/auctus_ws/dev_ros_ws/src`
 11. `catkin build`
 
+When I installed the first time the package, at the section "Install velocity_qp" at `catkin build`, I got an error. The compilator was not able to read a .c file. I checked on Internet to see if there was not a solution (I always check on Internet before asking to a colleague an help, I do not want to disturb them). And I saw that it lacked the line ENABLE_LANGUAGE(C) in the file CMakeLists.txt.
 
 ## Change environment variables
 
@@ -82,7 +83,9 @@ Publish the trajectory
 
 `rosservice call /velocity_qp/updateUI "publish_traj : true"`
 
+## Video
 
+A record is available in movie/arc.ogv
 ## Optional roslaunch parameter : 
 
 `robot_ip` IP adress of the panda robot
@@ -93,6 +96,8 @@ Publish the trajectory
 
 The controller parameters are stored in a yaml file in the `/config` folder and loaded as ros parameters in the `run.launch` file. They are then read by the 
 controller with load_parameters(); .
+
+![ALT](/image/step4.png)
 
 # Custom messages and service
 
