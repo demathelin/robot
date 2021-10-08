@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 [![pipeline status](https://gitlab.inria.fr/auctus/panda/velocity_qp/badges/master/pipeline.svg)](https://gitlab.inria.fr/auctus/panda/velocity_qp)
 [![Quality Gate Status](https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=auctus%3Apanda%3Avelocity-qp&metric=alert_status)](https://sonarqube.inria.fr/sonarqube/dashboard?id=auctus%3Apanda%3Atorque-qp)
 [![Coverage](https://sonarqube.inria.fr/sonarqube/api/project_badges/measure?project=auctus%3Apanda%3Avelocity-qp&metric=coverage)](https://sonarqube.inria.fr/sonarqube/dashboard?id=auctus%3Apanda%3Avelocity-qp)
@@ -104,6 +103,4 @@ controller with load_parameters(); .
 
 Custom messages can be defined in the `msg` folder. An example is provided with the `PandaRunMsg.msg` file.
 Custom services can be defined in the `srv` folder. An example is provided with the `UI.srv` file.
-=======
-# robot
->>>>>>> b496b4f1b73e6f1b04ff5ad323a7cc5164f27f9f
+
